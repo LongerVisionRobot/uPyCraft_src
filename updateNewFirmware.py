@@ -227,11 +227,16 @@ class updateNewFirmware(QDialog):
         self.resize(450,200)
         self.setLayout(layout)
 
-        self.connect(self.okButton,SIGNAL("clicked()"),self.chooseOk)
-        self.connect(self.cancelButton,SIGNAL("clicked()"),self.chooseCancel)
-        self.connect(self.boardComboBox,SIGNAL("activated(int)"),self.boardChange)
-        self.connect(self.radioUPY,SIGNAL("toggled(bool)"),self.radioUPYChanged)
-        self.connect(self.radioUser,SIGNAL("toggled(bool)"),self.radioUserChanged)
+        # self.connect(self.okButton,SIGNAL("clicked()"),self.chooseOk)
+        # self.connect(self.cancelButton,SIGNAL("clicked()"),self.chooseCancel)
+        # self.connect(self.boardComboBox,SIGNAL("activated(int)"),self.boardChange)
+        # self.connect(self.radioUPY,SIGNAL("toggled(bool)"),self.radioUPYChanged)
+        # self.connect(self.radioUser,SIGNAL("toggled(bool)"),self.radioUserChanged)
+        self.okButton.clicked.connect(self.chooseOk)
+        self.cancelButton.clicked.connect(self.chooseCancel)
+        self.boardComboBox.activated.connect(self.boardChange)
+        self.radioUPY.toggled.connect(self.radioUPYChanged)
+        self.radioUser.toggled.connect(self.radioUserChanged)
 
     def radioUPYChanged(self,choosed):
         if choosed:
