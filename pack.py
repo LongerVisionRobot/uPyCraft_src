@@ -7,7 +7,7 @@ import sys
 sys.argv.append('py2exe')
 
 py2exe_options = {
-        "includes": ["sip","PyQt4.QtCore","PyQt4.QtGui"],
+        "includes": ["sip","PyQt5.QtCore","PyQt5.QtGui"],
         "dll_excludes": ["MSVCP90.dll"],
         "compressed": 1,
         "optimize": 2,

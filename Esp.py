@@ -40,18 +40,20 @@ START_FLASH_TIMEOUT = 20  # timeout for starting flash (may perform erase)
 CHIP_ERASE_TIMEOUT = 120  # timeout for full chip erase
 SYNC_TIMEOUT = 0.1        # timeout for syncing with bootloader
 
-from PyQt4.QtGui import *  
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 class ESPTool(QObject):
   def __init__(self,parent=None):
     super(ESPTool,self).__init__(parent)
   def updatePer(self,per):
-    self.emit(SIGNAL("percentchange"),per)
+    # self.emit(SIGNAL("percentchange"),per)
+    self.percentchange.emit(per)
   def eraseStart(self):
-    self.emit(SIGNAL("eraseStart"))
+    # self.emit(SIGNAL("eraseStart"))
+    self.eraseStart.emit()
 
 esptool=None
-updateOkReset=None   
+updateOkReset=None
 
 DETECTED_FLASH_SIZES = {0x12: '256KB', 0x13: '512KB', 0x14: '1MB',
                         0x15: '2MB', 0x16: '4MB', 0x17: '8MB', 0x18: '16MB'}
@@ -1957,7 +1959,7 @@ def downOkReset():
     #updateOkReset._port.close()
     updateOkReset.hard_reset()
     updateOkReset._port.close()
-    
+
 def espCloseReset(port,board):
     if board=="TPYBoardV202":
       board="esp8266"
@@ -1976,7 +1978,7 @@ def espCloseReset(port,board):
     #esp._port.setRTS(False)
     esp.hard_reset()
     esp._port.close()
-    
+
 
 def Burn(obj,board,filename,port,erase=False,writeFlashAddr=0):
     args=Args()
@@ -1989,7 +1991,7 @@ def Burn(obj,board,filename,port,erase=False,writeFlashAddr=0):
     global esptool
     esptool = obj
     print('---------------------%s'%filename)
-    if not erase:      
+    if not erase:
       for i in range(0,len(args.addr_filename)):
         args.addr_filename.pop()
       fp=open(filename,'rb')
@@ -2063,7 +2065,7 @@ def Burn(obj,board,filename,port,erase=False,writeFlashAddr=0):
             sys.stdout.flush()
             if esp.IS_STUB:
                 esp.soft_reset(True)  # exit stub back to ROM loader
-                
+
         #esp._port.rtscts=True
         #esp._port.setRTS(False)
         ##time.sleep(0.1)
@@ -2078,7 +2080,7 @@ def Burn(obj,board,filename,port,erase=False,writeFlashAddr=0):
         #esp._port.setRTS(True)
         #esp.hard_reset()
         esp._port.close()
-        
+
         global updateOkReset
         updateOkReset=esp
         if not erase:
@@ -2578,5 +2580,3 @@ B1xg4xStcrsOSGL4ilWuK3BmLjMl0WLK1RrKYnB87YLxCFSgp6TtYXDF9WU9xwo4XPyaknnQ1BnAyq/3
 ys0acLMhm6h9txBl4FsMH3iKlSwHBFH9GzPZC0lj3xJUYza0gfbwIVCWTn6jbJS+6ktfTFo93wb+P+Hyn5log9eSTdhe5TQNqP4TlYWG/IpQAo7d1MEY1t+VNBISfOq7zeDJboi5gs2D2DFQV7G8sEP2nQIW7bLJ\
 sX2ymfJTFVqyowu+bOee7AVkbMrtNgkzIaRajLVN/NdHOHefRuLj+R267ywLOYwZLU0DI2E5LxmLa2svwb8O+/lfi/Ya/kZMZXVZFKoqtfvSXy2uv/nBIstLN9i1i5b/mCxq/m7xl5hQMZlUhda//gfTQr5T\
 """)))
-
-

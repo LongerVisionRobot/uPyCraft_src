@@ -4,13 +4,14 @@ import time
 import serial
 import serial.tools.list_ports
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 class SerialWidget(QWidget):
     def __init__(self,parent=None):
-        super(SerialWidget,self).__init__(parent)  
-        
+        super(SerialWidget,self).__init__(parent)
+
         serialBaund=QLabel("baud")
         self.baundComboBox=QComboBox()
         self.baundComboBox.addItems(['100','300','600','1200','2400','4800','9600','14400','19200','38400','56000','57600','115200','128000','256000'])
@@ -20,12 +21,12 @@ class SerialWidget(QWidget):
         self.bytesizeComboBox=QComboBox()
         self.bytesizeComboBox.addItems(['5','6','7','8'])
         self.bytesizeComboBox.setCurrentIndex(3)
-		
+
         serialParity=QLabel("parity")
         self.parityComboBox=QComboBox()
         self.parityComboBox.addItems(['NONE','EVEN','ODD','MARK','SPACE'])
         self.parityComboBox.setCurrentIndex(0)
-        
+
         #serialTimeout
 
         serialStopbits=QLabel("stopbits")
@@ -35,7 +36,7 @@ class SerialWidget(QWidget):
 
         self.okButton=QPushButton(self.tr("ok"))
         self.cancelButton=QPushButton(self.tr("cancel"))
-		
+
         self.detailWidget=QWidget()
         detailLayout=QGridLayout(self.detailWidget)
         detailLayout.addWidget(serialBaund,0,0)
@@ -48,11 +49,11 @@ class SerialWidget(QWidget):
 
         detailLayout.addWidget(serialParity,3,0)
         detailLayout.addWidget(self.parityComboBox,3,1)
-		
+
         #self.detailWidget.hide()
         detailLayout.addItem(QSpacerItem(200,200),4,0)
         self.setLayout(detailLayout)
-        
+
         self.ser=serial.Serial()
     def Port_List(self):
 	    Com_List=[]
@@ -64,7 +65,7 @@ class SerialWidget(QWidget):
       self.ser.port=com
       self.ser.baudrate = self.baundComboBox.currentText()
       self.ser.bytesize = int(self.bytesizeComboBox.currentText())
-      
+
       ParityValue = self.parityComboBox.currentText()
       self.ser.parity = ParityValue[0]
       self.ser.stopbits = int(self.stopbitsComboBox.currentText())
@@ -74,13 +75,13 @@ class SerialWidget(QWidget):
 
 class LanLocWidget(QWidget):
     def __init__(self,parent=None):
-        super(LanLocWidget,self).__init__(parent)  
-               
+        super(LanLocWidget,self).__init__(parent)
+
         languageLabel=QLabel(self.tr("Language"))
         self.languageComBox=QComboBox()
         self.languageComBox.addItems(['English'])
         self.languageComBox.setCurrentIndex(0)
-    
+
         locationLabel=QLabel(self.tr("Location"))
         self.locationComboBox=QComboBox()
         self.locationComboBox.addItems(['China Mainland','Others'])
@@ -114,16 +115,16 @@ class updateConfig(QWidget):
 
         detailLayout.addItem(QSpacerItem(200,200),1,0)
         self.setLayout(detailLayout)
-  
+
 class Preferences(QDialog):
     def __init__(self,parent=None):
-        super(Preferences,self).__init__(parent)  
+        super(Preferences,self).__init__(parent)
         self.widget=QWidget()
         layout=QGridLayout(self.widget)
 
         self.landlocation=LanLocWidget(self)
         self.configUpdate=updateConfig()
-        
+
         tabWidget=QTabWidget()
         tabWidget.setTabPosition(QTabWidget.West);
         tabWidget.addTab(SerialWidget(self),"Serial")
@@ -133,5 +134,4 @@ class Preferences(QDialog):
         self.setLayout(layout)
         self.resize(300,200)
         self.setWindowTitle("Preferences")
-        self.setWindowIcon(QIcon(':/logo.png')) 
-
+        self.setWindowIcon(QIcon(':/logo.png'))
