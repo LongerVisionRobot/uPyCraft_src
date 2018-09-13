@@ -4,8 +4,9 @@ import serial
 import serial.tools.list_ports
 import time
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 class updateNewFirmwareBar(QDialog):
     def __init__(self,windowname,isErase,isUPY,parent=None):
@@ -35,7 +36,7 @@ class updateNewFirmwareBar(QDialog):
 
         detailLayout=QWidget()
         layout = QGridLayout(detailLayout)
-        
+
         if isErase:
             self.eraseBar=QProgressBar(self)
             self.eraseLabel=QLabel(self.tr("EraseFlash"))
@@ -43,16 +44,16 @@ class updateNewFirmwareBar(QDialog):
             self.eraseBar.setTextVisible(False)
             self.eraseLabelLabel=QLabel(self.tr("0%"))
             self.eraseLabelLabel.setStyleSheet("color:red;")
-            
+
             if self.isUPY==True:
                 layout.addWidget(self.downloadLabel,0,0)
                 layout.addWidget(self.downloadBar,0,1)
                 layout.addWidget(self.downloadBarLable,0,2)
-                
+
                 layout.addWidget(self.eraseLabel,1,0)
                 layout.addWidget(self.eraseBar,1,1)
                 layout.addWidget(self.eraseLabelLabel,1,2)
-                
+
                 layout.addWidget(self.updateLabel,2,0)
                 layout.addWidget(self.updateBar,2,1)
                 layout.addWidget(self.updateBarLabel,2,2)
@@ -60,7 +61,7 @@ class updateNewFirmwareBar(QDialog):
                 layout.addWidget(self.eraseLabel,0,0)
                 layout.addWidget(self.eraseBar,0,1)
                 layout.addWidget(self.eraseLabelLabel,0,2)
-                
+
                 layout.addWidget(self.updateLabel,1,0)
                 layout.addWidget(self.updateBar,1,1)
                 layout.addWidget(self.updateBarLabel,1,2)
@@ -70,7 +71,7 @@ class updateNewFirmwareBar(QDialog):
                 layout.addWidget(self.downloadLabel,0,0)
                 layout.addWidget(self.downloadBar,0,1)
                 layout.addWidget(self.downloadBarLable,0,2)
-                
+
                 layout.addWidget(self.updateLabel,1,0)
                 layout.addWidget(self.updateBar,1,1)
                 layout.addWidget(self.updateBarLabel,1,2)
@@ -79,7 +80,7 @@ class updateNewFirmwareBar(QDialog):
                 layout.addWidget(self.updateBar,0,1)
                 layout.addWidget(self.updateBarLabel,0,2)
             self.resize(600,100)
-            
+
         self.setLayout(layout)
 
 
@@ -132,7 +133,7 @@ class updateNewFirmware(QDialog):
             self.comLabel=QLabel(self.tr("com"))
             self.comChoose=QComboBox()
             self.comChoose.addItems(Com_List)
-	
+
         self.okButton=QPushButton(self.tr("ok"))
         self.cancelButton=QPushButton(self.tr("cancel"))
 
@@ -152,20 +153,20 @@ class updateNewFirmware(QDialog):
         self.eraseComboBox.setCurrentIndex(1)
 
 
-        self.myGroupBox  = QGroupBox(self.tr("Firmware Choose"))         
+        self.myGroupBox  = QGroupBox(self.tr("Firmware Choose"))
 
         self.detailWidget=QWidget()
         layout = QGridLayout(self.detailWidget)
         #########
         self.myGroupBox  = QGroupBox(self.tr("Firmware Choose"))
-        
+
         self.myGroupBoxLayout = QGridLayout()
-        
+
         self.firmwareTip=QLabel(self.tr("Firmware Choose"))
         self.radioUPY=QRadioButton("uPyCraft")
         self.radioUser=QRadioButton("Users")
         self.firmwareName=QLineEdit()
-        self.chooseFirmwareButton=QPushButton(self.tr("choose"))   
+        self.chooseFirmwareButton=QPushButton(self.tr("choose"))
 
         self.myGroupBoxLayout.addWidget(self.radioUPY,0,0)
         self.myGroupBoxLayout.addWidget(self.radioUser,1,0)
@@ -206,7 +207,7 @@ class updateNewFirmware(QDialog):
 
             layout.addWidget(self.okButton,6,0)
             layout.addWidget(self.cancelButton,6,2)
-            
+
         self.radioUPY.setChecked(True)
         self.firmwareName.setEnabled(False)
         self.chooseFirmwareButton.setVisible(False)
@@ -222,7 +223,7 @@ class updateNewFirmware(QDialog):
             self.burnAddrComboBox.setEnabled(True)
         else:
             self.burnAddrComboBox.setEnabled(False)
-        
+
         self.resize(450,200)
         self.setLayout(layout)
 
@@ -243,7 +244,7 @@ class updateNewFirmware(QDialog):
             self.firmwareName.setEnabled(True)
             self.chooseFirmwareButton.setVisible(True)
 
-        
+
     def boardChange(self,item):
         print(self.boardComboBox.currentText())
         if self.boardComboBox.currentText()=="microbit":
@@ -259,7 +260,7 @@ class updateNewFirmware(QDialog):
         else:
             self.burnAddrComboBox.setCurrentIndex(0)
             self.burnAddrComboBox.setEnabled(False)
-            
+
     def chooseOk(self):
         self.close()
 
@@ -267,7 +268,7 @@ class updateNewFirmware(QDialog):
         self.close()
 
 
-#app=QApplication(sys.argv)  
-#main=updateNewFirmware("test")  
-#main.show()  
-#app.exec_() 
+#app=QApplication(sys.argv)
+#main=updateNewFirmware("test")
+#main.show()
+#app.exec_()
