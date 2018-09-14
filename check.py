@@ -21,7 +21,7 @@ rootDirectoryPath  =rootDirectoryPath.replace("\\","/")
 
 class checkVersionExampleFire(QThread):
     # Modified by Pei JIA, 2018-09-13
-    sig_changeIsCheckFirmware = pyqtSignal(bool)
+    sig_setIsCheckFirmware = pyqtSignal(bool)
     sig_changeUpdateFirmwareList = pyqtSignal(list)
     sig_updateThing = pyqtSignal(str, str)
     sig_updataPer = pyqtSignal(int)
@@ -45,7 +45,7 @@ class checkVersionExampleFire(QThread):
         self.downloadOk=False
         self.status=404
 
-        # self.connect(self.ui,SIGNAL("exitCheckThread"),self.exitCheckThread)
+        # self.connect(self.ui,SIGNAL("sig_exitCheckThread"),self.exitCheckThread)
         self.ui.sig_exitCheckThread.connect(self.exitCheckThread)
 
     def run(self):
@@ -88,8 +88,8 @@ class checkVersionExampleFire(QThread):
             myfile.write(page)
             myfile.close()
 
-            # self.emit(SIGNAL("changeIsCheckFirmware"),True)
-            self.sig_changeIsCheckFirmware.emit(True)
+            # self.emit(SIGNAL("sig_setIsCheckFirmware"),True)
+            self.sig_setIsCheckFirmware.emit(True)
 
             self.system = platform.system()#system check
 
@@ -106,7 +106,7 @@ class checkVersionExampleFire(QThread):
             self.firmwareList = jsonmsg['firmware']
             self.examplesList = jsonmsg['examples']
 
-            # self.emit(SIGNAL("changeUpdateFirmwareList"),self.firmwareList)
+            # self.emit(SIGNAL("sig_changeUpdateFirmwareList"),self.firmwareList)
             self.sig_changeUpdateFirmwareList.emit(self.firmwareList)
 
             # self.connect(self.ui,SIGNAL("confirmUpdata"),self.confirmUpdata)
@@ -116,14 +116,14 @@ class checkVersionExampleFire(QThread):
             if self.ideList[0]["version"]>nowIDEVersion:
                 print("ide has new version")
                 self.isDownload=True
-                # self.emit(SIGNAL("updateThing"),"update uPyCraft IDE","There is a new version available for uPyCraft, would you like to upgrade now?")
+                # self.emit(SIGNAL("sig_updateThing"),"update uPyCraft IDE","There is a new version available for uPyCraft, would you like to upgrade now?")
                 self.sig_updateThing.emit("update uPyCraft IDE","There is a new version available for uPyCraft, would you like to upgrade now?")
             else:
                 #examples
                 if self.examplesList[0]["version"]>nowExamplesVersion:
                     print("examples has new version")
                     self.isDownload=True
-                    # self.emit(SIGNAL("updateThing"),"update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
+                    # self.emit(SIGNAL("sig_updateThing"),"update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
                     self.sig_updateThing.emit("update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
         while 1:
             if self.isDownload==True:
@@ -141,7 +141,7 @@ class checkVersionExampleFire(QThread):
 
                     if self.examplesList[0]["version"]>nowExamplesVersion:
                         print("examples has new version")
-                        # self.emit(SIGNAL("updateThing"),"update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
+                        # self.emit(SIGNAL("sig_updateThing"),"update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
                         self.sig_updateThing.emit("update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
                     else:
                         self.isDownload=False
@@ -157,7 +157,7 @@ class checkVersionExampleFire(QThread):
                         for afile in f.namelist():
                             f.extract(afile,"%s/AppData/Local/uPyCraft"%rootDirectoryPath)
                         f.close()
-                        # self.emit(SIGNAL("reflushExamples"))
+                        # self.emit(SIGNAL("sig_reflushExamples"))
                         self.sig_reflushExamples.emit()
                     self.isDownload=False
             else:
@@ -194,7 +194,7 @@ class checkVersionExampleFire(QThread):
         elif gotoUpdata=="IDEcancel":
             if self.examplesList[0]["version"]>nowExamplesVersion:
                 print("examples has new version")
-                # self.emit(SIGNAL("updateThing"),"update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
+                # self.emit(SIGNAL("sig_updateThing"),"update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
                 self.sig_updateThing.emit("update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
             else:
                 self.isDownload=False
