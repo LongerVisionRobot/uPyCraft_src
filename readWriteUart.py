@@ -10,8 +10,13 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 class readWriteUart(QThread):
+    sig_uiRecvFromUart = pyqtSignal(str)
+    sig_ctrlRecvUartMsg = pyqtSignal(str)
+
     def __init__(self,queue,parent):
-        super(readWriteUart,self).__init__(parent)
+        # super(readWriteUart,self).__init__(parent)
+        super().__init__()
+
         self.ui=parent
         self.model=""
         self.writemsg=""
@@ -20,7 +25,7 @@ class readWriteUart(QThread):
         self.maybeCN=b""
         self.currentBoard="esp32"
         # self.connect(self.ui,SIGNAL("changeCurrentBoard"),self.changeCurrentBoard)
-        self.ui.changeCurrentBoard.connect(self.changeCurrentBoard)
+        self.ui.sig_changeCurrentBoard.connect(self.changeCurrentBoard)
 
     def run(self):
         readNum=0
@@ -52,7 +57,7 @@ class readWriteUart(QThread):
                             self.lastmodel=""
                         elif self.lastmodel=="exec_":
                             # self.emit(SIGNAL("uiRecvFromUart"),"program is running,do anything with stop it!1\n")
-                            self.uiRecvFromUart.emit("program is running,do anything with stop it!1\n")
+                            self.sig_uiRecvFromUart.emit("program is running,do anything with stop it!1\n")
                             continue
                         try:
                             self.ui.myserial.ser.write(self.writemsg)
@@ -65,7 +70,7 @@ class readWriteUart(QThread):
                     elif self.model=="ctrltouart":
                         if self.lastmodel=="exec_":
                             # self.emit(SIGNAL("uiRecvFromUart"),"program is running,do anything with stop it!2\n")
-                            self.uiRecvFromUart.emit("program is running,do anything with stop it!2\n")
+                            self.sig_uiRecvFromUart.emit("program is running,do anything with stop it!2\n")
                             self.model="uitouart"
                             continue
                         try:
@@ -79,7 +84,7 @@ class readWriteUart(QThread):
                     elif self.model=="exec_":
                         if self.lastmodel=="exec_":
                             # self.emit(SIGNAL("uiRecvFromUart"),"program is running,do anything with stop it!3\n")
-                            self.uiRecvFromUart.emit("program is running,do anything with stop it!3\n")
+                            self.sig_uiRecvFromUart.emit("program is running,do anything with stop it!3\n")
                             self.model="uitouart"
                             continue
                         self.lastmodel="exec_"
@@ -112,7 +117,7 @@ class readWriteUart(QThread):
                             self.lastmodel=""
 
                     # self.emit(SIGNAL("uiRecvFromUart"),data)
-                    self.uiRecvFromUart.emit(data)
+                    self.sig_uiRecvFromUart.emit(data)
 
                     #if self.ui.myserial.ser.inWaiting()>=128:
                     #    self.ui.myserial.ser.flushInput()
@@ -132,7 +137,7 @@ class readWriteUart(QThread):
                         execSendData=""
                         self.lastmodel=""
                     # self.emit(SIGNAL("uiRecvFromUart"),data)
-                    self.uiRecvFromUart.emit(data)
+                    self.sig_uiRecvFromUart.emit(data)
                     if self.ui.myserial.ser.inWaiting()>=128:
                         self.ui.myserial.ser.flushInput()
                 elif self.model=="ctrltouart":
@@ -205,7 +210,7 @@ class readWriteUart(QThread):
                         readNum+=1
                         if readNum==6:
                             # self.emit(SIGNAL("ctrlRecvUartMsg"),sendData)
-                            self.ctrlRecvUartMsg.emit(sendData)
+                            self.sig_ctrlRecvUartMsg.emit(sendData)
                             sendData=""
                             readNum=0
                     else:
@@ -213,7 +218,7 @@ class readWriteUart(QThread):
                         readNum=0
                 else:
                     # self.emit(SIGNAL("uiRecvFromUart"),"error read model")
-                    self.uiRecvFromUart.emit("error read model")
+                    self.sig_uiRecvFromUart.emit("error read model")
 
             else:
                 time.sleep(0.01)
