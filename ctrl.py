@@ -7,8 +7,9 @@ import time
 import threading
 import json
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 rootDirectoryPath  =os.path.expanduser("~")
 rootDirectoryPath  =rootDirectoryPath.replace("\\","/")
@@ -20,16 +21,19 @@ class ctrlAction(QThread):
         self.readWriteUart=readWriteUart
         self.ui = parent
         self.currentBoard="esp32"
-        self.connect(self.ui,SIGNAL("changeCurrentBoard"),self.changeCurrentBoard)
+        # self.connect(self.ui,SIGNAL("changeCurrentBoard"),self.changeCurrentBoard)
+        self.ui.changeCurrentBoard.connect(self.changeCurrentBoard)
         self.ctrltouiQueue=ctrltouiQueue
         self.ctrltouartQueue=readWriteQueue
         self.rootDir=""
-        self.connect(self.readWriteUart,SIGNAL("ctrlRecvUartMsg"),self.ctrlRecvUartMsg)
+        # self.connect(self.readWriteUart,SIGNAL("ctrlRecvUartMsg"),self.ctrlRecvUartMsg)
+        self.readWriteUart.ctrlRecvUartMsg.connect(self.ctrlRecvUartMsg)
         self.clear()
 
         self.recvAllData=""
         self.dragDropModel=False
-        self.connect(self.ui,SIGNAL("changeDragDropModel"),self.changeDragDropModel)
+        # self.connect(self.ui,SIGNAL("changeDragDropModel"),self.changeDragDropModel)
+        self.ui.changeDragDropModel.connect(self.changeDragDropModel)
 
     def run(self):
         while True:
@@ -38,7 +42,7 @@ class ctrlAction(QThread):
 
             if msg[0]=="treeModel":
                 self.treeModel()
-                
+
             elif msg[0]=="dropdownfile":
                 self.dropDownFileName=msg[1]
                 self.downloadFile(msg[2])
@@ -142,7 +146,8 @@ class ctrlAction(QThread):
             if endTime-startTime>3:
                 self.importUosBool=False
                 self.importUosMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"import os timeout")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"import os timeout")
+                self.uiRecvFromCtrl.emit("import os timeout")
                 return
 
         if self.importUosMsg.find("Traceback")>=0 or self.importUosMsg.find("... ")>=0:
@@ -150,7 +155,8 @@ class ctrlAction(QThread):
             returnData=self.importUosMsg
             self.importUosMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),"import os false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"import os false")
+                self.uiRecvFromCtrl.emit("import os false")
             else:
                 self.ctrltouartQueue.put("uitouart:::\x03")
                 time.sleep(0.01)
@@ -174,7 +180,8 @@ class ctrlAction(QThread):
             if endTime-startTime>3:
                 self.getcwdBool=False
                 self.getcwdMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"getcwd timeout")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"getcwd timeout")
+                self.uiRecvFromCtrl.emit("getcwd timeout")
                 return
         if self.getcwdMsg.find("Traceback")>=0 or self.getcwdMsg.find("... ")>=0:
             self.getcwdBool=False
@@ -182,18 +189,20 @@ class ctrlAction(QThread):
             self.getcwdMsg=""
             if returnData.find("Traceback")>=0:
                 self.emit(SIGNAL("uiRecvFromCtrl"),"getcwd false")
+                self.uiRecvFromCtrl.emit("getcwd false")
             else:
                 self.ctrltouartQueue.put("uitouart:::\x03")
                 time.sleep(0.01)
             return
-        
+
         rootDir=self.getcwdMsg.split("\r\n")
-        self.emit(SIGNAL("uiRecvFromCtrl"),"rootDir:%s"%rootDir[1][1:-1])
+        # self.emit(SIGNAL("uiRecvFromCtrl"),"rootDir:%s"%rootDir[1][1:-1])
+        self.uiRecvFromCtrl.emit("rootDir:%s"%rootDir[1][1:-1])
         self.rootDir=rootDir[1][1:-1]
         self.getcwdBool=False
         self.getcwdMsg=""
-                
-        
+
+
     def dragChangeDir(self,dragfile,dropfile):
         if sys.platform=="linux" and str(dragfile).find(rootDirectoryPath)<0:
             dropfile=dropfile + "/" + dragfile.split("/")[-1]
@@ -245,7 +254,7 @@ class ctrlAction(QThread):
                     if dirreturn==False:
                         return False
         return True
-        
+
     def getMoreRmDir(self,dirpath):
         self.deleteFileMsg=""
         self.ctrltouartQueue.put("ctrltouart:::os.listdir(\'%s\')\r\n"%str(dirpath))
@@ -294,7 +303,7 @@ class ctrlAction(QThread):
 
         self.renameMsg=""
         self.ctrltouartQueue.put("ctrltouart:::os.stat(\'%s\')\r\n"%str(oldname))
-        
+
         startTime=time.time()
         while 1:
             if self.renameMsg=="":
@@ -305,21 +314,25 @@ class ctrlAction(QThread):
             if endTime-startTime>1:
                 self.renameBool=False
                 self.renameMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"rename timeout")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"rename timeout")
+                self.uiRecvFromCtrl.emit("rename timeout")
                 return
-        
+
         if self.renameMsg.find("Traceback")>=0 or self.renameMsg.find("... ")>=0:
             self.renameBool=False
             returnData=self.renameMsg
             self.renameMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"rename error")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"rename error")
+                self.uiRecvFromCtrl.emit("rename error")
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"rename error")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"rename error")
+                self.uiRecvFromCtrl.emit("rename error")
             return
 
         isdir=self.renameMsg.split("\r\n")
@@ -342,20 +355,24 @@ class ctrlAction(QThread):
                 if endTime-startTime>1:
                     self.renameBool=False
                     self.renameMsg=""
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename file false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename file false")
+                    self.uiRecvFromCtrl.emit("rename file false")
                     return
             if self.renameMsg.find("Traceback")>=0 or self.renameMsg.find("... ")>=0:
                 self.renameBool=False
                 returnData=self.renameMsg
                 self.renameMsg=""
                 if returnData.find("Traceback")>=0:
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename file false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename file false")
+                    self.uiRecvFromCtrl.emit("rename file false")
                 else:
                     self.ctrltouartQueue.put("ctrltouart:::\x03")
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename file false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename file false")
+                    self.uiRecvFromCtrl.emit("rename file false")
                 return
-            
-            self.emit(SIGNAL("uiRecvFromCtrl"),"rename ok")
+
+            # self.emit(SIGNAL("uiRecvFromCtrl"),"rename ok")
+            self.uiRecvFromCtrl.emit("rename ok")
         else:#dir
             self.ctrltouartQueue.put("ctrltouart:::os.listdir(\'%s\')\r\n"%str(oldname))
             startTime=time.time()
@@ -368,7 +385,8 @@ class ctrlAction(QThread):
                 if endTime-startTime>1:
                     self.renameBool=False
                     self.renameMsg=""
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename dir false1")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename dir false1")
+                    self.uiRecvFromCtrl.emit("rename dir false1")
                     return
 
             if self.renameMsg.find("Traceback")>=0 or self.renameMsg.find("... ")>=0:
@@ -376,12 +394,14 @@ class ctrlAction(QThread):
                 returnData=self.renameMsg
                 self.renameMsg=""
                 if returnData.find("Traceback")>=0:
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename dir false2")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename dir false2")
+                    self.uiRecvFromCtrl.emit("rename dir false2")
                 else:
                     self.ctrltouartQueue.put("ctrltouart:::\x03")
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename dir false3")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename dir false3")
+                    self.uiRecvFromCtrl.emit("rename dir false3")
                 return
-            
+
             inDirFile = self.renameMsg[str(self.renameMsg).find("["):str(self.renameMsg).find("]")+1]
             print(inDirFile)
             self.returnUIinDirFile=[]
@@ -397,12 +417,14 @@ class ctrlAction(QThread):
                         if dirreturn==False:
                             self.renameBool=False
                             self.renameMsg=""
-                            self.emit(SIGNAL("uiRecvFromCtrl"),"rename false")
+                            # self.emit(SIGNAL("uiRecvFromCtrl"),"rename false")
+                            self.uiRecvFromCtrl.emit("rename false")
                             return
 
             print(self.returnUIinDirFile)
 
-            self.emit(SIGNAL("renameDirDeleteDirTab"),self.returnUIinDirFile)
+            # self.emit(SIGNAL("renameDirDeleteDirTab"),self.returnUIinDirFile)
+            self.renameDirDeleteDirTab.emit(self.returnUIinDirFile)
 
             self.renameMsg=""
             self.ctrltouartQueue.put("ctrltouart:::os.rename(\'%s\',\'%s\')\r\n"%(str(oldname),str(newname)))
@@ -416,21 +438,25 @@ class ctrlAction(QThread):
                 if endTime-startTime>1:
                     self.renameBool=False
                     self.renameMsg=""
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename false1")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename false1")
+                    self.uiRecvFromCtrl.emit("rename false1")
                     return
             if self.renameMsg.find("Traceback")>=0 or self.renameMsg.find("... ")>=0:
                 self.renameBool=False
                 returnData=self.renameMsg
                 self.renameMsg=""
                 if returnData.find("Traceback")>=0:
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename false2")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename false2")
+                    self.uiRecvFromCtrl.emit("rename false2")
                 else:
                     self.ctrltouartQueue.put("ctrltouart:::\x03")
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rename false3")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rename false3")
+                    self.uiRecvFromCtrl.emit("rename false3")
                 return
-            
-            self.emit(SIGNAL("uiRecvFromCtrl"),"rename ok")
-          
+
+            # self.emit(SIGNAL("uiRecvFromCtrl"),"rename ok")
+            self.uiRecvFromCtrl.emit("rename ok")
+
         self.renameBool=False
         self.renameMsg=""
 
@@ -450,21 +476,25 @@ class ctrlAction(QThread):
             if endTime-startTime>1:
                 self.createNewDirBool=False
                 self.createNewDirMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"dir false:time out")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"dir false:time out")
+                self.uiRecvFromCtrl.emit("dir false:time out")
                 return
         if self.createNewDirMsg.find("Traceback")>=0 or self.createNewDirMsg.find("... ")>=0:
             self.createNewDirBool=False
             returnData=self.createNewDirMsg
             self.createNewDirMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"dir false:cmd not full")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"dir false:cmd not full")
+                self.uiRecvFromCtrl.emit("dir false:cmd not full")
             return
 
-        self.emit(SIGNAL("uiRecvFromCtrl"),"newdir ok")
+        # self.emit(SIGNAL("uiRecvFromCtrl"),"newdir ok")
+        self.uiRecvFromCtrl.emit("newdir ok")
         self.createNewDirBool=False
         self.createNewDirMsg=""
 
@@ -482,21 +512,25 @@ class ctrlAction(QThread):
             if endTime-startTime>2:
                 self.checkFirmwareBool=False
                 self.checkFirmwareMsg=""
-                self.emit(SIGNAL("checkFiremware"),"false")
+                # self.emit(SIGNAL("checkFiremware"),"false")
+                self.checkFiremware.emit("false")
                 return
         if self.checkFirmwareMsg.find("Traceback")>=0 or self.checkFirmwareMsg.find("... ")>=0:
             self.checkFirmwareBool=False
             returnData=self.checkFirmwareMsg
             self.checkFirmwareMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("checkFiremware"),"false")
+                # self.emit(SIGNAL("checkFiremware"),"false")
+                self.checkFiremware.emit("false")
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("checkFiremware"),"false")
+                # self.emit(SIGNAL("checkFiremware"),"false")
+                self.checkFiremware.emit("false")
             return
         else:
-            self.emit(SIGNAL("checkFiremware"),self.checkFirmwareMsg)
+            # self.emit(SIGNAL("checkFiremware"),self.checkFirmwareMsg)
+            self.checkFiremware.emit(self.checkFirmwareMsg)
             self.checkFirmwareMsg=""
             self.checkFirmwareBool=False
             return
@@ -522,20 +556,24 @@ class ctrlAction(QThread):
             if endTime-startTime>1:
                 self.setDefaultProgBool=False
                 self.setDefaultProgMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program open file timeout")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program open file timeout")
+                self.uiRecvFromCtrl.emit("set Default Program open file timeout")
                 return
         if self.setDefaultProgMsg.find("Traceback")>=0 or self.setDefaultProgMsg.find("... ")>=0:
             self.setDefaultProgBool=False
             returnData=self.setDefaultProgMsg
             self.setDefaultProgMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                self.uiRecvFromCtrl.emit("set Default Program false")
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                self.uiRecvFromCtrl.emit("set Default Program false")
             return
 
         self.setDefaultProgMsg=""
@@ -550,7 +588,7 @@ class ctrlAction(QThread):
             #    readwriteQueue.put("ctrltouart:::myfile.write(\"try:\\r  exec(open(\'%s\').read(),globals())\\rexcept:\\r  exec(open(\'%s\').read(),globals())\")\r\n"%(str(filename),str(filenameLast)))
             #else:
             self.ctrltouartQueue.put("ctrltouart:::myfile.write(\"exec(open(\'%s\').read(),globals())\")\r\n"%str(filename))
-       
+
         startTime=time.time()
         while 1:
             if self.setDefaultProgMsg=="":
@@ -562,20 +600,24 @@ class ctrlAction(QThread):
             if endTime-startTime>3:
                 self.setDefaultProgBool=False
                 self.setDefaultProgMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                self.uiRecvFromCtrl.emit("set Default Program false")
                 return
         if self.setDefaultProgMsg.find("Traceback")>=0 or self.setDefaultProgMsg.find("... ")>=0:
             self.setDefaultProgBool=False
             returnData=self.setDefaultProgMsg
             self.setDefaultProgMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                self.uiRecvFromCtrl.emit("set Default Program false")
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                self.uiRecvFromCtrl.emit("set Default Program false")
             return
 
         self.setDefaultProgMsg=""
@@ -596,23 +638,28 @@ class ctrlAction(QThread):
             if endTime-startTime>1:
                 self.setDefaultProgBool=False
                 self.setDefaultProgMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                self.uiRecvFromCtrl.emit("set Default Program false")
                 return
         if self.setDefaultProgMsg.find("Traceback")>=0 or self.setDefaultProgMsg.find("... ")>=0:
             self.setDefaultProgBool=False
             returnData=self.setDefaultProgMsg
             self.setDefaultProgMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                self.uiRecvFromCtrl.emit("set Default Program false")
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default Program false")
+                self.uiRecvFromCtrl.emit("set Default Program false")
             return
 
-        self.emit(SIGNAL("uiRecvFromCtrl"),"set Default ok")
+        # self.emit(SIGNAL("uiRecvFromCtrl"),"set Default ok")
+        self.uiRecvFromCtrl.emit("set Default ok")
         self.setDefaultProgBool=False
         self.setDefaultProgMsg=""
 
@@ -635,7 +682,8 @@ class ctrlAction(QThread):
             if endTime-startTime>3:
                 self.deleteFileBool=False
                 self.deleteFileMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false1")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false1")
+                self.uiRecvFromCtrl.emit("rm file false1")
                 return
 
         if self.deleteFileMsg.find("Traceback")>=0 or self.deleteFileMsg.find("... ")>=0:
@@ -643,16 +691,20 @@ class ctrlAction(QThread):
             returnData=self.deleteFileMsg
             self.deleteFileMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false2")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false2")
+                self.uiRecvFromCtrl.emit("rm file false2")
             else:
                 self.ctrltouartQueue.put("uitouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false3")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false3")
+                self.uiRecvFromCtrl.emit("rm file false3")
             return
-                
-        self.emit(SIGNAL("deleteBoardFileSig"),filename)
+
+        # self.emit(SIGNAL("deleteBoardFileSig"),filename)
+        self.deleteBoardFileSig.emit(filename)
         self.deleteFileBool=False
         self.deleteFileMsg=""
 
@@ -680,7 +732,8 @@ class ctrlAction(QThread):
             if endTime-startTime>1:
                 self.deleteFileBool=False
                 self.deleteFileMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"delete error stat timeout")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"delete error stat timeout")
+                self.uiRecvFromCtrl.emit("delete error stat timeout")
                 return
 
         if self.deleteFileMsg.find("Traceback")>=0 or self.deleteFileMsg.find("... ")>=0:
@@ -688,13 +741,16 @@ class ctrlAction(QThread):
             returnData=self.deleteFileMsg
             self.deleteFileMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"delete error")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"delete error")
+                self.uiRecvFromCtrl.emit("delete error")
             else:
                 self.ctrltouartQueue.put("uitouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"delete error")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"delete error")
+                self.uiRecvFromCtrl.emit("delete error")
             return
 
 
@@ -718,7 +774,8 @@ class ctrlAction(QThread):
                 if endTime-startTime>2:
                     self.deleteFileBool=False
                     self.deleteFileMsg=""
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false1")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false1")
+                    self.uiRecvFromCtrl.emit("rm file false1")
                     return
 
             if self.deleteFileMsg.find("Traceback")>=0 or self.deleteFileMsg.find("... ")>=0:
@@ -726,16 +783,20 @@ class ctrlAction(QThread):
                 returnData=self.deleteFileMsg
                 self.deleteFileMsg=""
                 if returnData.find("Traceback")>=0:
-                    self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                    self.uiRecvFromCtrl.emit(returnData)
                     time.sleep(0.01)
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false2")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false2")
+                    self.uiRecvFromCtrl.emit("rm file false2")
                 else:
                     self.ctrltouartQueue.put("uitouart:::\x03")
                     time.sleep(0.01)
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false3")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm file false3")
+                    self.uiRecvFromCtrl.emit("rm file false3")
                 return
-                
-            self.emit(SIGNAL("deleteBoardFileSig"),filename)
+
+            # self.emit(SIGNAL("deleteBoardFileSig"),filename)
+            self.deleteBoardFileSig.emit(filename)
         else:#rmdir
             self.deleteFileMsg=""
             self.ctrltouartQueue.put("ctrltouart:::os.listdir(\'%s\')\r\n"%str(filename))
@@ -749,21 +810,25 @@ class ctrlAction(QThread):
                 if endTime-startTime>1:
                     self.deleteFileBool=False
                     self.deleteFileMsg=""
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    self.uiRecvFromCtrl.emit("rm dir false")
                     return
-            
+
             if self.deleteFileMsg.find("Traceback")>=0 or self.deleteFileMsg.find("... ")>=0:
                 self.deleteFileBool=False
                 returnData=self.deleteFileMsg
                 self.deleteFileMsg=""
                 if returnData.find("Traceback")>=0:
-                    self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                    self.uiRecvFromCtrl.emit(returnData)
                     time.sleep(0.01)
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    self.uiRecvFromCtrl.emit("rm dir false")
                 else:
                     self.ctrltouartQueue.put("uitouart:::\x03")
                     time.sleep(0.01)
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    self.uiRecvFromCtrl.emit("rm dir false")
                 return
 
             inDirFile = ""
@@ -781,10 +846,12 @@ class ctrlAction(QThread):
                         if dirreturn==False:
                             self.deleteFileBool=False
                             self.deleteFileMsg=""
-                            self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                            # self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                            self.uiRecvFromCtrl.emit("rm dir false")
                             return
 
-            self.emit(SIGNAL("renameDirDeleteDirTab"),self.returnUIinDirFile)
+            # self.emit(SIGNAL("renameDirDeleteDirTab"),self.returnUIinDirFile)
+            self.renameDirDeleteDirTab.emit(self.returnUIinDirFile)
 
             self.deleteFileMsg=""
 
@@ -799,7 +866,8 @@ class ctrlAction(QThread):
                 if endTime-startTime>1:
                     self.deleteFileBool=False
                     self.deleteFileMsg=""
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    self.uiRecvFromCtrl.emit("rm dir false")
                     return
 
             if self.deleteFileMsg.find("Traceback")>=0 or self.deleteFileMsg.find("... ")>=0:
@@ -807,17 +875,21 @@ class ctrlAction(QThread):
                 returnData=self.deleteFileMsg
                 self.deleteFileMsg=""
                 if returnData.find("Traceback")>=0:
-                    self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                    self.uiRecvFromCtrl.emit(returnData)
                     time.sleep(0.01)
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    self.uiRecvFromCtrl.emit("rm dir false")
                 else:
                     self.ctrltouartQueue.put("uitouart:::\x03")
                     time.sleep(0.01)
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"rm dir false")
+                    self.uiRecvFromCtrl.emit("rm dir false")
                 return
 
-            self.emit(SIGNAL("uiRecvFromCtrl"),"rmdir ok")
-            
+            # self.emit(SIGNAL("uiRecvFromCtrl"),"rmdir ok")
+            self.uiRecvFromCtrl.emit("rmdir ok")
+
         self.deleteFileBool=False
         self.deleteFileMsg=""
 
@@ -836,7 +908,7 @@ class ctrlAction(QThread):
                         break
             else:
                 pass
-            
+
         if self.currentBoard=="microbit":
             if str(filename).find("./")>=0:
                 aline="exec(open('%s').read(),globals())"%str(filename[2:])
@@ -871,7 +943,8 @@ class ctrlAction(QThread):
             if endTime-startTime>3:
                 self.loadFileBool=False
                 self.loadFileMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"open board file timeout")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"open board file timeout")
+                self.uiRecvFromCtrl.emit("open board file timeout")
                 return
 
         if self.loadFileMsg.find("Traceback")>=0 or self.loadFileMsg.find("... ")>=0:
@@ -879,22 +952,25 @@ class ctrlAction(QThread):
             returnData=self.loadFileMsg
             self.loadFileMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"open board file false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"open board file false")
+                self.uiRecvFromCtrl.emit("open board file false")
             else:
                 readwriteQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"open board file false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"open board file false")
+                self.uiRecvFromCtrl.emit("open board file false")
             return
 
         self.loadfileMsg=self.loadFileMsg.replace("\r\n","\r")
         self.loadfileMsg=self.loadFileMsg.replace("\n","\r")
-        
+
         myList=self.loadFileMsg.split('\r')
 
         appendMsg=''
-        lenth=0     
+        lenth=0
         while lenth<=len(myList):
             if lenth==0:        #lenth=0,list err
                 pass
@@ -918,14 +994,15 @@ class ctrlAction(QThread):
                 connectdir=connectdir+afile+"/"
                 if os.path.exists(currentTempPath+connectdir)==False:
                     os.mkdir(currentTempPath+connectdir)
-                    
+
         myfile=open(currentTempPath+connectdir,'w',encoding='UTF-8')
         if type(appendMsg) is bytes:
             appendMsg=appendMsg.decode('utf-8')
         myfile.write(appendMsg)
         myfile.close()
 
-        self.emit(SIGNAL("loadFileSig"),filename,appendMsg)
+        # self.emit(SIGNAL("loadFileSig"),filename,appendMsg)
+        self.loadFileSig.emit(filename,appendMsg)
         self.loadFileMsg=""
         self.loadFileBool=False
 
@@ -946,10 +1023,10 @@ class ctrlAction(QThread):
                     afile=str(filename).split("/")
                 else:
                     afile=str(filename).split("\\")
-                afile=afile[-1]           
+                afile=afile[-1]
         else:
             afile=str(filename).split("/")[-1]
-        
+
         self.downloadFileBool=True
 
         if self.dragDropModel == True:
@@ -957,7 +1034,8 @@ class ctrlAction(QThread):
                 fileHandle=open(filename,'rbU')
             except Exception:
                 self.downloadFileBool=False
-                self.emit(SIGNAL("uiRecvFromCtrl"),"no suport for download dir")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"no suport for download dir")
+                self.uiRecvFromCtrl.emit("no suport for download dir")
                 return
             afile=self.dropDownFileName
         elif sys.platform=="linux" and filename.find(rootDirectoryPath)<0:
@@ -973,7 +1051,7 @@ class ctrlAction(QThread):
 
             if type(filemsg) is bytes:
                 filemsg=filemsg.decode('utf-8')
-        
+
             myfile.write(filemsg)
             myfile.close()
             fileHandle=open(currentTempPath+"/"+str(filename.split("/")[-1]),'rbU')
@@ -991,11 +1069,14 @@ class ctrlAction(QThread):
                 fileHandle.close()
                 self.downloadFileBool=False
                 self.downloadFileMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"runningFileBreakFalse")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"runningFileBreakFalse")
+                self.uiRecvFromCtrl.emit("runningFileBreakFalse")
                 return
 
-        self.emit(SIGNAL("uiRecvFromCtrl"),self.downloadFileMsg)
-        self.emit(SIGNAL("uiRecvFromCtrl"),"Ready to download this file,please wait!")
+        # self.emit(SIGNAL("uiRecvFromCtrl"),self.downloadFileMsg)
+        # self.emit(SIGNAL("uiRecvFromCtrl"),"Ready to download this file,please wait!")
+        self.uiRecvFromCtrl.emit(self.downloadFileMsg)
+        self.uiRecvFromCtrl.emit("Ready to download this file,please wait!")
 
         ##################
         #open(filename,'w')
@@ -1009,7 +1090,7 @@ class ctrlAction(QThread):
                 time.sleep(0.001)
         else:
             self.ctrltouartQueue.put("ctrltouart:::myfile=open(\'%s\',\'w\')\r\n"%str(afile))
-        
+
         startTime=time.time()
         while 1:
             if self.downloadFileMsg=="":
@@ -1021,7 +1102,8 @@ class ctrlAction(QThread):
                 fileHandle.close()
                 self.downloadFileBool=False
                 self.downloadFileMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                self.uiRecvFromCtrl.emit("download false")
                 return
         if self.downloadFileMsg.find("Traceback")>=0 or self.downloadFileMsg.find("... ")>=0:
             fileHandle.close()
@@ -1029,13 +1111,16 @@ class ctrlAction(QThread):
             returnData=self.downloadFileMsg
             self.downloadFileMsg=""
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                self.uiRecvFromCtrl.emit("download false")
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                self.uiRecvFromCtrl.emit("download false")
             return
 
         ##################
@@ -1050,7 +1135,8 @@ class ctrlAction(QThread):
 
             if(str(aline)!="b''"):
                 if self.currentBoard=="microbit":
-                    self.emit(SIGNAL("uiRecvFromCtrl"),".")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),".")
+                    self.uiRecvFromCtrl.emit(".")
                     self.downloadFileMsg=""
                     try:
                         aline=aline.decode()
@@ -1069,7 +1155,7 @@ class ctrlAction(QThread):
                 else:
                     try:
                         aline=aline.decode()
-                        
+
                         #if aline.find("\r\n")<0 and aline.find("\\n")>=0:
                         #    aline=aline.replace("\n","\r")
                         #elif aline.find("\r\n")>=0:
@@ -1077,14 +1163,16 @@ class ctrlAction(QThread):
                         aline=aline.replace("\r\n","\r")
                         aline=aline.replace("\n","\r")
                         aline=aline.encode('utf-8')
-                        self.emit(SIGNAL("uiRecvFromCtrl"),".")
+                        # self.emit(SIGNAL("uiRecvFromCtrl"),".")
+                        self.uiRecvFromCtrl.emit(".")
                         self.downloadFileMsg=""
                         self.ctrltouartQueue.put("ctrltouart:::myfile.write(%s)\r\n"%aline)
                     except:
-                        self.emit(SIGNAL("uiRecvFromCtrl"),".")
+                        # self.emit(SIGNAL("uiRecvFromCtrl"),".")
+                        self.uiRecvFromCtrl.emit(".")
                         self.downloadFileMsg=""
                         self.ctrltouartQueue.put("ctrltouart:::myfile.write(%s)\r\n"%aline)
-                
+
                 startTime=time.time()
                 while 1:#if this place is false锛宼hink about that Whether join err deal with self.downFileFalseDeal(afile)
                     if self.downloadFileMsg=="":
@@ -1096,7 +1184,8 @@ class ctrlAction(QThread):
                         fileHandle.close()
                         self.downloadFileBool=False
                         self.downloadFileMsg=""
-                        self.emit(SIGNAL("uiRecvFromCtrl"),"download false4")
+                        # self.emit(SIGNAL("uiRecvFromCtrl"),"download false4")
+                        self.uiRecvFromCtrl.emit("download false4")
                         return
                 if self.downloadFileMsg.find("Traceback")>=0 or self.downloadFileMsg.find("... ")>=0:
                     fileHandle.close()
@@ -1106,15 +1195,19 @@ class ctrlAction(QThread):
 
                     self.downFileFalseDeal(afile)
                     if returnData.find("Traceback")>=0:
-                        self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                        # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                        self.uiRecvFromCtrl.emit(returnData)
                         time.sleep(0.01)
-                        self.emit(SIGNAL("uiRecvFromCtrl"),"download false5")
+                        # self.emit(SIGNAL("uiRecvFromCtrl"),"download false5")
+                        self.uiRecvFromCtrl.emit("download false5")
                     else:
                         self.ctrltouartQueue.put("ctrltouart:::\x03")
                         time.sleep(0.01)
-                        self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
-                        self.emit(SIGNAL("uiRecvFromCtrl"),"download false6")
-                    return      
+                        # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                        # self.emit(SIGNAL("uiRecvFromCtrl"),"download false6")
+                        self.uiRecvFromCtrl.emit(returnData)
+                        self.uiRecvFromCtrl.emit("download false6")
+                    return
             else:
                 done=1
 
@@ -1141,7 +1234,8 @@ class ctrlAction(QThread):
             if endTime-startTime>3:
                 self.downloadFileBool=False
                 self.downloadFileMsg=""
-                self.emit(SIGNAL("uiRecvFromCtrl"),"download false7")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"download false7")
+                self.uiRecvFromCtrl.emit("download false7")
                 return
         if self.downloadFileMsg.find("Traceback")>=0 or self.downloadFileMsg.find("... ")>=0:
             self.downloadFileBool=False
@@ -1150,19 +1244,23 @@ class ctrlAction(QThread):
 
             self.downFileFalseDeal(afile)
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                self.uiRecvFromCtrl.emit("download false")
             else:
                 #self.readuart.serial.ser.write("\x03")
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"download false")
+                self.uiRecvFromCtrl.emit("download false")
             return
-        
+
         self.downloadFileBool=False
         self.downloadFileMsg=""
-        self.emit(SIGNAL("uiRecvFromCtrl"),"download ok")
+        # self.emit(SIGNAL("uiRecvFromCtrl"),"download ok")
+        self.uiRecvFromCtrl.emit("download ok")
         return
 
     def treeWaitUart(self):
@@ -1176,7 +1274,8 @@ class ctrlAction(QThread):
             if endTime-startTime>3:
                 self.reflushTreeBool=False
                 self.reflushTreeMsg=""
-                self.emit(SIGNAL("reflushTree"),"err")
+                # self.emit(SIGNAL("reflushTree"),"err")
+                self.reflushTree.emit("err")
                 return "err"
 
     def getFileTree(self,dir):
@@ -1193,13 +1292,16 @@ class ctrlAction(QThread):
             self.reflushTreeMsg=""
 
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                self.uiRecvFromCtrl.emit("reflush tree false")
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                self.uiRecvFromCtrl.emit("reflush tree false")
             return "err"
 
         filemsg=self.reflushTreeMsg[self.reflushTreeMsg.find("["):self.reflushTreeMsg.find("]")+1]
@@ -1210,13 +1312,13 @@ class ctrlAction(QThread):
             return ret
         filelist=[]
         filemsg=filemsg.split("'")
-        
+
         for i in filemsg:
             if i.find("[")>=0 or i.find(",")>=0 or i.find("]")>=0:
                 pass
             else:
                 filelist.append(i)
-        
+
         for i in filelist:
             self.reflushTreeMsg=""
             self.ctrltouartQueue.put("ctrltouart:::os.stat(\'%s\')\r\n"%(dir+"/"+i))
@@ -1229,13 +1331,16 @@ class ctrlAction(QThread):
                 self.reflushTreeMsg=""
 
                 if returnData.find("Traceback")>=0:
-                    self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                    self.uiRecvFromCtrl.emit(returnData)
                     time.sleep(0.01)
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                    self.uiRecvFromCtrl.emit("reflush tree false")
                 else:
                     self.ctrltouartQueue.put("ctrltouart:::\x03")
                     time.sleep(0.01)
-                    self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                    # self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                    self.uiRecvFromCtrl.emit("reflush tree false")
                 return "err"
 
             isdir=self.reflushTreeMsg.split("\r\n")
@@ -1254,7 +1359,8 @@ class ctrlAction(QThread):
                 else:
                     ret[dir].append(i)
             except:
-                self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                self.uiRecvFromCtrl.emit("reflush tree false")
                 return "err"
 
         return ret
@@ -1266,24 +1372,27 @@ class ctrlAction(QThread):
         for i in aline:
             self.ctrltouartQueue.put("ctrltouart:::%s"%i)
             time.sleep(0.001)
-        
+
         result=self.treeWaitUart()
         if result=="err":
             return result
-        
+
         if self.reflushTreeMsg.find("Traceback")>=0 or self.reflushTreeMsg.find("... ")>=0:
             self.reflushTreeBool=False
             returnData=self.reflushTreeMsg
             self.reflushTreeMsg=""
 
             if returnData.find("Traceback")>=0:
-                self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                # self.emit(SIGNAL("uiRecvFromCtrl"),returnData)
+                self.uiRecvFromCtrl.emit(returnData)
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                self.uiRecvFromCtrl.emit("reflush tree false")
             else:
                 self.ctrltouartQueue.put("ctrltouart:::\x03")
                 time.sleep(0.01)
-                self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                # self.emit(SIGNAL("uiRecvFromCtrl"),"reflush tree false")
+                self.uiRecvFromCtrl.emit("reflush tree false")
             return "err"
 
         filemsg=self.reflushTreeMsg[self.reflushTreeMsg.find("["):self.reflushTreeMsg.find("]")+1]
@@ -1294,7 +1403,7 @@ class ctrlAction(QThread):
             return ret
         filelist=[]
         filemsg=filemsg.split("'")
-        
+
         for i in filemsg:
             if i.find("[")>=0 or i.find(",")>=0 or i.find("]")>=0:
                 pass
@@ -1327,7 +1436,7 @@ class ctrlAction(QThread):
                 for i in aline:
                     self.ctrltouartQueue.put("ctrltouart:::%s"%i)
                     time.sleep(0.001)
-                
+
             else:
                 self.ctrltouartQueue.put("ctrltouart:::print (open(\'main.py\',\'r\').read())\r\n")
 
@@ -1342,8 +1451,9 @@ class ctrlAction(QThread):
         else:
             self.ui.myDefaultProgram=""
             pass
-                    
-        self.emit(SIGNAL("reflushTree"),res)
+
+        # self.emit(SIGNAL("reflushTree"),res)
+        self.reflushTree.emit(res)
         self.reflushTreeMsg=""
         self.reflushTreeBool=False
 
@@ -1356,28 +1466,28 @@ class ctrlAction(QThread):
             if self.recvAllData.find(">>> ")>=0 or self.recvAllData.find("... ")>=0:
                 self.reflushTreeMsg=self.recvAllData
                 self.recvAllData=""
-            return     
+            return
         elif self.loadFileBool==True:
             print("loadfileMsg is true")
             self.recvAllData+=data
             if self.recvAllData.find(">>> ")>=0 or self.recvAllData.find("... ")>=0:
                 self.loadFileMsg=self.recvAllData
                 self.recvAllData=""
-            return        
+            return
         elif self.intoFuncBool==True:
             print("intoFuncMsg is true")
             self.recvAllData+=data
             if self.recvAllData.find(">>> ")>=0 or self.recvAllData.find("... ")>=0:
                 self.intoFuncMsg=self.recvAllData
                 self.recvAllData=""
-            return 
+            return
         elif self.deleteFileBool==True:
             print("deleteFileMsg is true")
             self.recvAllData+=data
             if self.recvAllData.find(">>> ")>=0 or self.recvAllData.find("... ")>=0:
                 self.deleteFileMsg=self.recvAllData
                 self.recvAllData=""
-            return      
+            return
         elif self.downloadFileBool==True:
             print("downBigFileMsg is true")
             self.recvAllData+=data
@@ -1386,7 +1496,7 @@ class ctrlAction(QThread):
             if self.recvAllData.find(">>> ")>=0 or self.recvAllData.find("... ")>=0:
                 self.downloadFileMsg=self.recvAllData
                 self.recvAllData=""
-            return        
+            return
         elif self.downFileFalseBool==True:
             print("downFileFalse is true")
             if self.recvAllData.find(">>> ")>=0 or self.recvAllData.find("... ")>=0:
@@ -1435,8 +1545,5 @@ class ctrlAction(QThread):
                 self.recvAllData=""
             return
         else:
-            self.emit(SIGNAL("uiRecvFromCtrl"),data)
-
-
-
-
+            # self.emit(SIGNAL("uiRecvFromCtrl"),data)
+            self.uiRecvFromCtrl.emit(data)
