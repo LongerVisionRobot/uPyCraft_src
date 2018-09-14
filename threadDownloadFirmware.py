@@ -18,8 +18,14 @@ from PyQt5.QtWidgets import *
 
 
 class threadUserFirmware(QThread):
+    sig_firmwareAnyErase = pyqtSignal(int)
+    sig_firmwareAnyUpdate = pyqtSignal(int)
+    sig_firmwareAnyDown = pyqtSignal(int)
+    sig_goMicrobitUpdate = pyqtSignal()
+
     def __init__(self, board, savepath, com, iserase, size, addr, parent):
-        super(threadUserFirmware,self).__init__(parent)
+        # super(threadUserFirmware,self).__init__(parent)
+        super().__init__()
 
         self.board=board
         self.savepath=savepath
@@ -51,35 +57,35 @@ class threadUserFirmware(QThread):
                 Esp.Burn(esptool,str(self.board),self.savepath,self.com,True)
                 time.sleep(1)
                 self.erasePer=100
-                # self.emit(SIGNAL("firmwareAnyErase"),self.erasePer)
-                self.firmwareAnyErase.emit(self.erasePer)
+                # self.emit(SIGNAL("sig_firmwareAnyErase"),self.erasePer)
+                self.sig_firmwareAnyErase.emit(self.erasePer)
                 self.erasetimer.cancel()
             except:
                 time.sleep(1)
                 self.erasePer=-1
-                # self.emit(SIGNAL("firmwareAnyErase"),self.erasePer)
-                self.firmwareAnyErase.emit(self.erasePer)
+                # self.emit(SIGNAL("sig_firmwareAnyErase"),self.erasePer)
+                self.sig_firmwareAnyErase.emit(self.erasePer)
                 self.erasetimer.cancel()
                 self.erasestart=False
                 self.exit()
                 return
 
         if self.iserase=="yes":
-            # self.emit(SIGNAL("firmwareAnyErase"),100)
-            self.firmwareAnyErase.emit(100)
+            # self.emit(SIGNAL("sig_firmwareAnyErase"),100)
+            self.sig_firmwareAnyErase.emit(100)
         try:
             if self.board=="esp32" or self.board=="esp8266" or self.board=="TPYBoardV202":
                 Esp.Burn(esptool,str(self.board),self.savepath,self.com,False,self.burnaddr)
             else:#microbit
                 print("In threaddownloadfirmware:savepath=%s"%self.savepath)
-                # self.emit(SIGNAL("firmwareAnyUpdate"),-2)
-                self.firmwareAnyUpdate.emit(-2)
+                # self.emit(SIGNAL("sig_firmwareAnyUpdate"),-2)
+                self.sig_firmwareAnyUpdate.emit(-2)
                 time.sleep(0.5)
                 # self.emit(SIGNAL("goMicrobitUpdate"))
-                self.goMicrobitUpdate.emit()
+                self.sig_goMicrobitUpdate.emit()
         except:
-            # self.emit(SIGNAL("firmwareAnyUpdate"),-1)
-            self.firmwareAnyUpdate.emit(-1)
+            # self.emit(SIGNAL("sig_firmwareAnyUpdate"),-1)
+            self.sig_firmwareAnyUpdate.emit(-1)
             self.exit()
             return
         if self.board=="esp8266":
@@ -95,17 +101,17 @@ class threadUserFirmware(QThread):
         per=100.0*blocknum*blocksize/self.size
         if per>=100:
             per=100
-            # self.emit(SIGNAL("firmwareAnyDown"),per)
-            self.firmwareAnyDown.emit(per)
+            # self.emit(SIGNAL("sig_firmwareAnyDown"),per)
+            self.sig_firmwareAnyDown.emit(per)
             return
 
-        # self.emit(SIGNAL("firmwareAnyDown"),per)
-        self.firmwareAnyDown.emit(per)
+        # self.emit(SIGNAL("sig_firmwareAnyDown"),per)
+        self.sig_firmwareAnyDown.emit(per)
 
     def updateFirmwarePer(self,per):
         print("updateFirmwarePer:%d"%per)
-        # self.emit(SIGNAL("firmwareAnyUpdate"),per)
-        self.firmwareAnyUpdate.emit(per)
+        # self.emit(SIGNAL("sig_firmwareAnyUpdate"),per)
+        self.sig_firmwareAnyUpdate.emit(per)
 
     def eraseStart(self):
         self.erasestart=True
@@ -116,19 +122,21 @@ class threadUserFirmware(QThread):
 
         if self.erasePer>=99:
             self.erasePer=99
-            # self.emit(SIGNAL("firmwareAnyErase"),self.erasePer)
-            self.firmwareAnyErase.emit(self.erasePer)
+            # self.emit(SIGNAL("sig_firmwareAnyErase"),self.erasePer)
+            self.sig_firmwareAnyErase.emit(self.erasePer)
             self.erasestart=False
             return
-        # self.emit(SIGNAL("firmwareAnyErase"),self.erasePer)
-        self.firmwareAnyErase.emit(self.erasePer)
+        # self.emit(SIGNAL("sig_firmwareAnyErase"),self.erasePer)
+        self.sig_firmwareAnyErase.emit(self.erasePer)
 
         self.erasetimer=threading.Timer(0.1,self.eraseTimer)
         self.erasetimer.start()
 
 class threadDownloadFirmware(QThread):
     def __init__(self, url, board, savepath, com, iserase, size, addr, parent):
-        super(threadDownloadFirmware,self).__init__(parent)
+        # super(threadDownloadFirmware,self).__init__(parent)
+        super().__init__()
+        
         self.url=url
         self.board=board
         self.savepath=savepath
@@ -168,35 +176,35 @@ class threadDownloadFirmware(QThread):
                     Esp.Burn(esptool,str(self.board),self.savepath,self.com,True)
                     time.sleep(1)
                     self.erasePer=100
-                    # self.emit(SIGNAL("firmwareAnyErase"),self.erasePer)
-                    self.firmwareAnyErase.emit(self.erasePer)
+                    # self.emit(SIGNAL("sig_firmwareAnyErase"),self.erasePer)
+                    self.sig_firmwareAnyErase.emit(self.erasePer)
                     self.erasetimer.cancel()
                 except:
                     time.sleep(1)
                     self.erasePer=-1
-                    # self.emit(SIGNAL("firmwareAnyErase"),self.erasePer)
-                    self.firmwareAnyErase.emit(self.erasePer)
+                    # self.emit(SIGNAL("sig_firmwareAnyErase"),self.erasePer)
+                    self.sig_firmwareAnyErase.emit(self.erasePer)
                     self.erasetimer.cancel()
                     self.erasestart=False
                     self.exit()
                     return
 
             if self.iserase=="yes":
-                # self.emit(SIGNAL("firmwareAnyErase"),100)
-                self.firmwareAnyErase.emit(100)
+                # self.emit(SIGNAL("sig_firmwareAnyErase"),100)
+                self.sig_firmwareAnyErase.emit(100)
             try:
                 if self.board=="esp32" or self.board=="esp8266" or self.board=="TPYBoardV202":
                     Esp.Burn(esptool,str(self.board),self.savepath,self.com,False,self.burnaddr)
                 else:#microbit
                     print("In threaddownloadfirmware:savepath=%s"%self.savepath)
-                    # self.emit(SIGNAL("firmwareAnyUpdate"),-2)
-                    self.firmwareAnyUpdate.emit(-2)
+                    # self.emit(SIGNAL("sig_firmwareAnyUpdate"),-2)
+                    self.sig_firmwareAnyUpdate.emit(-2)
                     time.sleep(0.5)
-                    # self.emit(SIGNAL("goMicrobitUpdate"))
-                    self.goMicrobitUpdate.emit()
+                    # self.emit(SIGNAL("sig_goMicrobitUpdate"))
+                    self.sig_goMicrobitUpdate.emit()
             except:
-                # self.emit(SIGNAL("firmwareAnyUpdate"),-1)
-                self.firmwareAnyUpdate.emit(-1)
+                # self.emit(SIGNAL("sig_firmwareAnyUpdate"),-1)
+                self.sig_firmwareAnyUpdate.emit(-1)
                 self.exit()
                 return
             if self.board=="esp8266" or self.board=="TPYBoardV202":
@@ -207,8 +215,8 @@ class threadDownloadFirmware(QThread):
     def reDownload(self):
         if self.reDownloadNum==3:
             self.downloadOk=False
-            # self.emit(SIGNAL("firmwareAnyDown"),-1)
-            self.firmwareAnyDown.emit(-1)
+            # self.emit(SIGNAL("sig_firmwareAnyDown"),-1)
+            self.sig_firmwareAnyDown.emit(-1)
             return
         try:
             socket.setdefaulttimeout(5)
@@ -230,17 +238,17 @@ class threadDownloadFirmware(QThread):
         per=100.0*blocknum*blocksize/self.size
         if per>=100:
             per=100
-            # self.emit(SIGNAL("firmwareAnyDown"),per)
-            self.firmwareAnyDown.emit(per)
+            # self.emit(SIGNAL("sig_firmwareAnyDown"),per)
+            self.sig_firmwareAnyDown.emit(per)
             return
 
-        # self.emit(SIGNAL("firmwareAnyDown"),per)
-        self.firmwareAnyDown.emit(per)
+        # self.emit(SIGNAL("sig_firmwareAnyDown"),per)
+        self.sig_firmwareAnyDown.emit(per)
 
     def updateFirmwarePer(self,per):
         print("updateFirmwarePer:%d"%per)
-        # self.emit(SIGNAL("firmwareAnyUpdate"),per)
-        self.firmwareAnyUpdate.emit(per)
+        # self.emit(SIGNAL("sig_firmwareAnyUpdate"),per)
+        self.sig_firmwareAnyUpdate.emit(per)
 
     def eraseStart(self):
         self.erasestart=True
@@ -251,12 +259,12 @@ class threadDownloadFirmware(QThread):
 
         if self.erasePer>=99:
             self.erasePer=99
-            # self.emit(SIGNAL("firmwareAnyErase"),self.erasePer)
-            self.firmwareAnyErase.emit(self.erasePer)
+            # self.emit(SIGNAL("sig_firmwareAnyErase"),self.erasePer)
+            self.sig_firmwareAnyErase.emit(self.erasePer)
             self.erasestart=False
             return
-        # self.emit(SIGNAL("firmwareAnyErase"),self.erasePer)
-        self.firmwareAnyErase.emit(self.erasePer)
+        # self.emit(SIGNAL("sig_firmwareAnyErase"),self.erasePer)
+        self.sig_firmwareAnyErase.emit(self.erasePer)
 
         self.erasetimer=threading.Timer(0.1,self.eraseTimer)
         self.erasetimer.start()
