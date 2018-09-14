@@ -14,8 +14,13 @@ rootDirectoryPath  =rootDirectoryPath.replace("\\","/")
 currentExamplesPath="%s/opt/uPyCraft/examples/"%rootDirectoryPath
 
 class myTerminal(QTextEdit):
-    def __init__(self,queue,parent):
-        super(myTerminal,self).__init__(parent)
+    # Modified by Pei JIA, 2018-09-13
+    sig_setCursor = pyqtSignal()
+
+    def __init__(self, queue = None, parent = None):
+        # super(myTerminal,self).__init__(parent)
+        super().__init__()
+
         self.eventFilterEnable=False
         self.setStyleSheet("""QTextEdit{background-color: qlineargradient(x1: 0, x2: 1, stop: 0 #262D34, stop: 1 #222529);
                            border-style:none;
@@ -47,15 +52,15 @@ class myTerminal(QTextEdit):
         self.terminalRightMenu=None
         self.createTerminalRightMenu()
 
-        self.ui=parent
+        self.mainWidget=parent
         self.queue=queue
         self.currentBoard="esp32"
-        # self.connect(self.ui,SIGNAL("changeCurrentBoard"),self.changeBoard)
-        # self.connect(self.ui,SIGNAL("initRecvdata"),self.initRecvdata)
-        # self.connect(self.ui,SIGNAL("initMessycode"),self.initMessycode)
-        self.ui.changeCurrentBoard.connect(self.changeBoard)
-        self.ui.initRecvdata.connect(self.initRecvdata)
-        self.ui.initMessycode.connect(self.initMessycode)
+        # self.connect(self.mainWidget,SIGNAL("changeCurrentBoard"),self.changeBoard)
+        # self.connect(self.mainWidget,SIGNAL("initRecvdata"),self.initRecvdata)
+        # self.connect(self.mainWidget,SIGNAL("initMessycode"),self.initMessycode)
+        self.mainWidget.sig_changeCurrentBoard.connect(self.changeBoard)
+        self.mainWidget.sig_initRecvdata.connect(self.initRecvdata)
+        self.mainWidget.sig_initMessycode.connect(self.initMessycode)
 
         self.keyPressMsg=""
         self.recvdata=""
@@ -70,7 +75,7 @@ class myTerminal(QTextEdit):
     def createTerminalRightMenu(self):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         # self.connect(self,SIGNAL("customContextMenuRequested(const QPoint&)"),self.slotTerminalRightClickMenu)
-        self.customContextMenuRequested.connect(self.slotTerminalRightClickMenu)
+        self.sig_customContextMenuRequested.connect(self.slotTerminalRightClickMenu)
         self.terminalRightMenu=QMenu(self)
         self.terminalRightMenu.setStyleSheet(
                 """QMenu{background-color:rgb(67,67,67);
@@ -461,7 +466,7 @@ class myTerminal(QTextEdit):
             self.cursor = self.cursorForPosition(self.startCursorPosition)
             self.startPosition = self.cursor.position()
             # self.emit(SIGNAL("setCursor"))
-            self.setCursor.emit()
+            self.sig_setCursor.emit()
 
     def mouseMoveEvent(self,event):
         if event.button()==Qt.NoButton:
@@ -481,8 +486,10 @@ class myTerminal(QTextEdit):
 
 
 class myTreeView(QTreeView):
-    def __init__(self,parent):
-        super(myTreeView,self).__init__(parent)
+    def __init__(self, parent = None):
+        # super(myTreeView,self).__init__(parent)
+        super().__init__()
+
         self.ui=parent
 
         self.setHeaderHidden(True)
@@ -576,7 +583,7 @@ class myTreeView(QTreeView):
         self.rightClickMenu.addAction(self.newDir)
 
         #self.connect(self,SIGNAL("customContextMenuRequested(const QPoint&)"),self.slotRightClickMenu)
-        self.customContextMenuRequested.connect(self.slotRightClickMenu)
+        self.sig_customContextMenuRequested.connect(self.slotRightClickMenu)
 
     def slotRightClickMenu(self,point):
         self.rightClickMenu.clear()
@@ -733,7 +740,7 @@ class myTreeView(QTreeView):
                     self.ui.terminal.append("serial not open,can not download file")
                     return
                 # self.ui.emit(SIGNAL("changeDragDropModel"),True)
-                self.ui.changeDragDropModel.emit(True)
+                self.ui.sig_changeDragDropModel.emit(True)
                 self.ui.uitoctrlQueue.put("dropdownfile:::%s:::%s"%(filename,dropDownFileName))
                 print("filename=%s"%filename)
                 print("dropDownFileName=%s"%dropDownFileName)
@@ -804,7 +811,7 @@ class myTreeView(QTreeView):
                         newDropFileName=newDropFileName[7:str(newDropFileName).find(dirListDrop[-1])-1]
                         newDropFileName=self.ui.rootDir+newDropFileName
                     # self.ui.emit(SIGNAL("changeDragDropModel"),True)
-                    self.ui.changeDragDropModel.emit(True)
+                    self.ui.sig_changeDragDropModel.emit(True)
                     self.ui.uitoctrlQueue.put("dragChangeDir:::%s:::%s"%(oldDragFileName,newDropFileName))
                 else:
                     pass
@@ -822,7 +829,9 @@ class myTreeView(QTreeView):
 
 class myTabWidget(QTabWidget):
     def __init__(self,editorRightMenu,fileitem,parent):
-        super(myTabWidget,self).__init__(parent)
+        # super(myTabWidget,self).__init__(parent)
+        super().__init__()
+
         self.ui=parent
         self.setAcceptDrops(True)
         self.editorRightMenu=editorRightMenu
@@ -942,7 +951,7 @@ class myTabWidget(QTabWidget):
 
         editor.setContextMenuPolicy(Qt.CustomContextMenu)
         #self.connect(editor,SIGNAL("customContextMenuRequested(const QPoint&)"),self.slotEditorRightClickMenu)
-        editor.customContextMenuRequested().connect(self.slotEditorRightClickMenu)
+        editor.sig_customContextMenuRequested.connect(self.slotEditorRightClickMenu)
 
         if self.editorRightMenu==None:
             self.editorRightMenu=QMenu(self)
@@ -1029,18 +1038,18 @@ class myTabWidget(QTabWidget):
 
 
         #self.connect(editor,SIGNAL("dragOpenFile"),self.dragOpenFile)
-        editor.dragOpenFile.connect(self.dragOpenFile)
+        editor.sig_dragOpenFile.connect(self.dragOpenFile)
 
         #self.connect(editor,SIGNAL("textChanged()"),self.editorTextChange)
         #self.connect(editor,SIGNAL("selectionChanged()"),self.selectionChanged)
         #self.connect(editor,SIGNAL("linesChanged()"),self.linesChanged)
         #self.connect(editor,SIGNAL("cursorPositionChanged(int,int)"),self.cursorPositionChanged)
         #self.connect(editor,SIGNAL("userListActivated(int,const QString)"),self.userListActivated)
-        editor.textChanged.connect(self.editorTextChange)
-        editor.selectionChanged.connect(self.selectionChanged)
-        editor.linesChanged.connect(self.linesChanged)
-        editor.cursorPositionChanged.connect(self.cursorPositionChanged)
-        editor.userListActivated.connect(self.userListActivated)
+        editor.sig_textChanged.connect(self.editorTextChange)
+        editor.sig_selectionChanged.connect(self.selectionChanged)
+        editor.sig_linesChanged.connect(self.linesChanged)
+        editor.sig_cursorPositionChanged.connect(self.cursorPositionChanged)
+        editor.sig_userListActivated.connect(self.userListActivated)
 
         #self.connect(editor,SIGNAL("SCN_AUTOCSELECTION(const char*,int)"),self.scn_updateui)
 
@@ -1191,8 +1200,11 @@ class myTabWidget(QTabWidget):
             self.ui.pcOpenFile(filename)
 
 class myQsciScintilla(QsciScintilla):
+    sig_dragOpenFile = pyqtSignal(str)
+
     def __init__(self,parent=None):
-        super(myQsciScintilla,self).__init__(parent)
+        # super(myQsciScintilla,self).__init__(parent)
+        super().__init__()
 
     def dragEnterEvent(self,event):
         print("tabwidget dragenterevent2.")
@@ -1210,7 +1222,7 @@ class myQsciScintilla(QsciScintilla):
             for url in urls:
                 dropOpenFileName=url.toLocalFile()
             # self.emit(SIGNAL("dragOpenFile"),dropOpenFileName)
-            self.dragOpenFile.emit(dropOpenFileName)
+            self.sig_dragOpenFile.emit(dropOpenFileName)
 
 
 
