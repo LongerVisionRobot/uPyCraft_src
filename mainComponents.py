@@ -16,6 +16,8 @@ currentExamplesPath="%s/opt/uPyCraft/examples/"%rootDirectoryPath
 class myTerminal(QTextEdit):
     # Modified by Pei JIA, 2018-09-13
     sig_setCursor = pyqtSignal()
+    sig_cursorPositionChanged = pyqtSignal()
+    sig_customContextMenuRequested = pyqtSignal()
 
     def __init__(self, queue = None, parent = None):
         # super(myTerminal,self).__init__(parent)
@@ -74,7 +76,7 @@ class myTerminal(QTextEdit):
 
     def createTerminalRightMenu(self):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
-        # self.connect(self,SIGNAL("customContextMenuRequested(const QPoint&)"),self.slotTerminalRightClickMenu)
+        # self.connect(self,SIGNAL("sig_customContextMenuRequested(const QPoint&)"),self.slotTerminalRightClickMenu)
         self.sig_customContextMenuRequested.connect(self.slotTerminalRightClickMenu)
         self.terminalRightMenu=QMenu(self)
         self.terminalRightMenu.setStyleSheet(
@@ -465,7 +467,7 @@ class myTerminal(QTextEdit):
             self.startCursorPosition =event.pos()
             self.cursor = self.cursorForPosition(self.startCursorPosition)
             self.startPosition = self.cursor.position()
-            # self.emit(SIGNAL("setCursor"))
+            # self.emit(SIGNAL("sig_setCursor"))
             self.sig_setCursor.emit()
 
     def mouseMoveEvent(self,event):
@@ -486,6 +488,8 @@ class myTerminal(QTextEdit):
 
 
 class myTreeView(QTreeView):
+    sig_customContextMenuRequested = pyqtSignal()
+
     def __init__(self, parent = None):
         # super(myTreeView,self).__init__(parent)
         super().__init__()
@@ -582,7 +586,7 @@ class myTreeView(QTreeView):
         self.rightClickMenu.addAction(self.rename)
         self.rightClickMenu.addAction(self.newDir)
 
-        #self.connect(self,SIGNAL("customContextMenuRequested(const QPoint&)"),self.slotRightClickMenu)
+        #self.connect(self,SIGNAL("sig_customContextMenuRequested(const QPoint&)"),self.slotRightClickMenu)
         self.sig_customContextMenuRequested.connect(self.slotRightClickMenu)
 
     def slotRightClickMenu(self,point):
@@ -828,6 +832,9 @@ class myTreeView(QTreeView):
             return
 
 class myTabWidget(QTabWidget):
+    sig_tabCloseRequested = pyqtSignal(int)
+    sig_currentChanged = pyqtSignal(int)
+
     def __init__(self,editorRightMenu,fileitem,parent):
         # super(myTabWidget,self).__init__(parent)
         super().__init__()
@@ -841,10 +848,10 @@ class myTabWidget(QTabWidget):
         self.line=0
         self.index=0
 
-        #self.connect(self, SIGNAL("tabCloseRequested(int)"),self.closeTab)
-        self.tabCloseRequested.connect(self.closeTab)
-        #self.connect(self, SIGNAL("currentChanged(int)"),self.currentTabChange)
-        self.currentChanged.connect(self.currentTabChange)
+        #self.connect(self, SIGNAL("sig_tabCloseRequested(int)"),self.closeTab)
+        self.sig_tabCloseRequested.connect(self.closeTab)
+        #self.connect(self, SIGNAL("sig_currentChanged(int)"),self.currentTabChange)
+        self.sig_currentChanged.connect(self.currentTabChange)
 
     def closeTab(self,tabId):
         if tabId<0:
@@ -950,7 +957,7 @@ class myTabWidget(QTabWidget):
         editor.setText(msg)
 
         editor.setContextMenuPolicy(Qt.CustomContextMenu)
-        #self.connect(editor,SIGNAL("customContextMenuRequested(const QPoint&)"),self.slotEditorRightClickMenu)
+        #self.connect(editor,SIGNAL("sig_customContextMenuRequested(const QPoint&)"),self.slotEditorRightClickMenu)
         editor.sig_customContextMenuRequested.connect(self.slotEditorRightClickMenu)
 
         if self.editorRightMenu==None:
@@ -1037,7 +1044,7 @@ class myTabWidget(QTabWidget):
             self.fileitem.list.append(filename)
 
 
-        #self.connect(editor,SIGNAL("dragOpenFile"),self.dragOpenFile)
+        #self.connect(editor,SIGNAL("sig_dragOpenFile"),self.dragOpenFile)
         editor.sig_dragOpenFile.connect(self.dragOpenFile)
 
         #self.connect(editor,SIGNAL("textChanged()"),self.editorTextChange)
