@@ -10,7 +10,9 @@ from PyQt5.QtWidgets import *
 
 class updateNewFirmwareBar(QDialog):
     def __init__(self,windowname,isErase,isUPY,parent=None):
-        super(updateNewFirmwareBar,self).__init__(parent)
+        # super(updateNewFirmwareBar,self).__init__(parent)
+        super().__init__()
+
         self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
 
         self.setWindowTitle(windowname)
@@ -115,7 +117,9 @@ class updateNewFirmwareBar(QDialog):
 
 class updateNewFirmware(QDialog):
     def __init__(self,windowname,isAuto=False,parent=None):
-        super(updateNewFirmware,self).__init__(parent)
+        # super(updateNewFirmware,self).__init__(parent)
+        super().__init__()
+        
         self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
         self.setWindowTitle(windowname)
         self.setWindowIcon(QIcon(':/logo.png'))
