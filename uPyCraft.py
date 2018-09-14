@@ -14,7 +14,7 @@ import sys
 import math
 import json
 import os
-import Esp
+import esptool
 import shutil
 import webbrowser
 import qrc_resources
@@ -80,11 +80,33 @@ class fileItem:
         self.size=0
         self.list=[]
 
+
 class MainWidget(QMainWindow):
-    def __init__(self,parent=None):
-        super(MainWidget,self).__init__(parent)
-        #self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
-#basic set
+#     def __init__(self,parent=None):
+#         super(MainWidget,self).__init__(parent)
+#         #self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
+# #basic set
+
+    # Modified by Pei JIA, 2018-09-13
+    sig_changeCurrentBoard = pyqtSignal(str)
+    sig_initRecvdata = pyqtSignal()
+    sig_initMessycode = pyqtSignal()
+    sig_changeDragDropModel = pyqtSignal(bool)
+    sig_timerCloseTerminal = pyqtSignal()
+    sig_timerAddComMenu = pyqtSignal(int)
+    sig_timerSetComMenu = pyqtSignal(int)
+    sig_timerClearComMenu = pyqtSignal()
+    sig_exitCheckThread = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+        # show directly
+        self.show()
+
+    def initUI(self):
+
         self.setWindowTitle("uPyCraft V%s"%nowIDEVersion)
         self.setWindowIcon(QIcon(':/logo.png'))
         self.resize(1000,800)
@@ -160,49 +182,49 @@ class MainWidget(QMainWindow):
 #thread
 
         self.readuart=readWriteUart(self.readwriteQueue,self)
-        # self.connect(self.readuart,SIGNAL("uiRecvFromUart"),self.uiRecvFromUart)
-        self.readuart.uiRecvFromUart.connect(self.uiRecvFromUart)
+        # self.connect(self.readuart,SIGNAL("sig_uiRecvFromUart"),self.uiRecvFromUart)
+        self.readuart.sig_uiRecvFromUart.connect(self.uiRecvFromUart)
 
         self.ctrl=ctrlAction(self.readuart,self.readwriteQueue,self.uitoctrlQueue,self)
-        # self.connect(self.ctrl,SIGNAL("uiRecvFromCtrl"),self.uiRecvFromCtrl)
-        # self.connect(self.ctrl,SIGNAL("reflushTree"),self.reflushTree)
-        # self.connect(self.ctrl,SIGNAL("checkFiremware"),self.checkFiremware)
-        # self.connect(self.ctrl,SIGNAL("loadFileSig"),self.loadFileSig)
-        # self.connect(self.ctrl,SIGNAL("deleteBoardFileSig"),self.deleteBoardFileSig)
-        # self.connect(self.ctrl,SIGNAL("renameDirDeleteDirTab"),self.renameDirDeleteDirTab)
-        self.ctrl.uiRecvFromCtrl.connect(self.uiRecvFromCtrl)
-        self.ctrl.reflushTree.connect(self.reflushTree)
-        self.ctrl.checkFiremware.connect(self.checkFiremware)
-        self.ctrl.loadFileSig.connect(self.loadFileSig)
-        self.ctrl.deleteBoardFileSig.connect(self.deleteBoardFileSig)
-        self.ctrl.renameDirDeleteDirTab.connect(self.renameDirDeleteDirTab)
+        # self.connect(self.ctrl,SIGNAL("sig_uiRecvFromCtrl"),self.uiRecvFromCtrl)
+        # self.connect(self.ctrl,SIGNAL("sig_reflushTree"),self.reflushTree)
+        # self.connect(self.ctrl,SIGNAL("sig_checkFiremware"),self.checkFiremware)
+        # self.connect(self.ctrl,SIGNAL("sig_loadFileSig"),self.loadFileSig)
+        # self.connect(self.ctrl,SIGNAL("sig_deleteBoardFileSig"),self.deleteBoardFileSig)
+        # self.connect(self.ctrl,SIGNAL("sig_renameDirDeleteDirTab"),self.renameDirDeleteDirTab)
+        self.ctrl.sig_uiRecvFromCtrl.connect(self.uiRecvFromCtrl)
+        self.ctrl.sig_reflushTree.connect(self.reflushTree)
+        self.ctrl.sig_checkFiremware.connect(self.checkFiremware)
+        self.ctrl.sig_loadFileSig.connect(self.loadFileSig)
+        self.ctrl.sig_deleteBoardFileSig.connect(self.deleteBoardFileSig)
+        self.ctrl.sig_renameDirDeleteDirTab.connect(self.renameDirDeleteDirTab)
         #self.connect(self.ctrl,SIGNAL("intoFuncSig"),self.intoFuncSig)
 #timer for serial check
         self.timerClose=False
         global timer
         timer=threading.Timer(1,self.fun_timer)
-        # self.connect(self,SIGNAL("timerCloseTerminal"),self.timerCloseTerminal)
-        # self.connect(self,SIGNAL("timerAddComMenu"),self.timerAddComMenu)
-        # self.connect(self,SIGNAL("timerSetComMenu"),self.timerSetComMenu)
-        # self.connect(self,SIGNAL("timerClearComMenu"),self.timerClearComMenu)
-        self.timerCloseTerminal.connect(self.timerCloseTerminal)
-        self.timerAddComMenu.connect(self.timerAddComMenu)
-        self.timerSetComMenu.connect(self.timerSetComMenu)
-        self.timerClearComMenu.connect(self.timerClearComMenu)
+        # self.connect(self,SIGNAL("sig_timerCloseTerminal"),self.timerCloseTerminal)
+        # self.connect(self,SIGNAL("sig_timerAddComMenu"),self.timerAddComMenu)
+        # self.connect(self,SIGNAL("sig_timerSetComMenu"),self.timerSetComMenu)
+        # self.connect(self,SIGNAL("sig_timerClearComMenu"),self.timerClearComMenu)
+        self.sig_timerCloseTerminal.connect(self.timerCloseTerminal)
+        self.sig_timerAddComMenu.connect(self.timerAddComMenu)
+        self.sig_timerSetComMenu.connect(self.timerSetComMenu)
+        self.sig_timerClearComMenu.connect(self.timerClearComMenu)
         timer.start()
 
 #check version(IDE,examples)
         self.check=checkVersionExampleFire(self)
-        # self.connect(self.check,SIGNAL("updateThing"),self.updateThing)
-        # self.connect(self.check,SIGNAL("updatePer"),self.updataPer)
-        # self.connect(self.check,SIGNAL("reflushExamples"),self.reflushExamples)
-        # self.connect(self.check,SIGNAL("changeUpdateFirmwareList"),self.changeUpdateFirmwareList)
-        # self.connect(self.check,SIGNAL("changeIsCheckFirmware"),self.setIsCheckFirmware)
-        self.check.updateThing.connect(self.updateThing)
-        self.check.updataPer.connect(self.updataPer)
-        self.check.reflushExamples.connect(self.reflushExamples)
-        self.check.changeUpdateFirmwareList.connect(self.changeUpdateFirmwareList)
-        self.check.changeIsCheckFirmware.connect(self.changeIsCheckFirmware)
+        # self.connect(self.check,SIGNAL("sig_updateThing"),self.sig_updateThing)
+        # self.connect(self.check,SIGNAL("sig_updatePer"),self.updataPer)
+        # self.connect(self.check,SIGNAL("sig_reflushExamples"),self.sig_reflushExamples)
+        # self.connect(self.check,SIGNAL("sig_changeUpdateFirmwareList"),self.changeUpdateFirmwareList)
+        # self.connect(self.check,SIGNAL("sig_setIsCheckFirmware"),self.setIsCheckFirmware)
+        self.check.sig_updateThing.connect(self.updateThing)
+        self.check.sig_updataPer.connect(self.updataPer)
+        self.check.sig_reflushExamples.connect(self.reflushExamples)
+        self.check.sig_changeUpdateFirmwareList.connect(self.changeUpdateFirmwareList)
+        self.check.sig_setIsCheckFirmware.connect(self.setIsCheckFirmware)
 
         self.check.start()
 
@@ -210,6 +232,7 @@ class MainWidget(QMainWindow):
         QMessageBox { background-color: rgb(236,236,236);color:black; }
         QPushButton{background-color:rgb(253,97,72);color:white;}
         """)
+
 
     def setFont(self):
         fonts=None
@@ -301,10 +324,10 @@ class MainWidget(QMainWindow):
         self.cursorLeftOrRight=0
         self.moveposition=0
 
-        #self.connect(self.terminal,SIGNAL("cursorPositionChanged()"),self.slotTerminalCursorChanged)
-        #self.connect(self.terminal,SIGNAL("setCursor"),self.slotTerminalSetCursor)
-        self.terminal.cursorPositionChanged.connect(self.slotTerminalCursorChanged)
-        self.terminal.setCursor.connect(self.slotTerminalSetCursor)
+        #self.connect(self.terminal,SIGNAL("sig_cursorPositionChanged()"),self.slotTerminalCursorChanged)
+        #self.connect(self.terminal,SIGNAL("sig_setCursor"),self.slotTerminalSetCursor)
+        self.terminal.sig_cursorPositionChanged.connect(self.slotTerminalCursorChanged)
+        self.terminal.sig_setCursor.connect(self.slotTerminalSetCursor)
 
     def createTabWidget(self):
         self.tabWidget=myTabWidget(self.editorRightMenu,self.fileitem,self)
@@ -1556,8 +1579,8 @@ class MainWidget(QMainWindow):
             self.uitoctrlQueue.put("getcwd")
 
 
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
         self.terminal.setReadOnly(False)
         self.slotTreeModel()
@@ -1681,8 +1704,8 @@ class MainWidget(QMainWindow):
         else:
             self.uitoctrlQueue.put("getcwd")
 
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
         self.terminal.setReadOnly(False)
         self.slotTreeModel()
@@ -1732,10 +1755,10 @@ class MainWidget(QMainWindow):
         while not self.readwriteQueue.empty():
             self.readwriteQueue.get()
 
-        # self.emit(SIGNAL("initRecvdata"))
-        # self.emit(SIGNAL("initMessycode"))
-        self.initRecvdata.emit()
-        self.initMessycode.emit()
+        # self.emit(SIGNAL("sig_initRecvdata"))
+        # self.emit(SIGNAL("sig_initMessycode"))
+        self.sig_initRecvdata.emit()
+        self.sig_initMessycode.emit()
         time.sleep(0.1)
         self.myserial.ser.close()
         #if self.currentBoard=="esp32" or self.currentBoard=="esp8266":
@@ -1799,8 +1822,8 @@ class MainWidget(QMainWindow):
             myfile.write(filemsg)
             myfile.close()
 
-        # self.emit(SIGNAL("changeDragDropModel"),False)
-        self.changeDragDropModel.emit(False)
+        # self.emit(SIGNAL("sig_changeDragDropModel"),False)
+        self.sig_changeDragDropModel.emit(False)
         self.uitoctrlQueue.put("downloadfile:::%s"%afile)
 
         return True
@@ -2028,8 +2051,8 @@ class MainWidget(QMainWindow):
 
     def boardEsp32(self):
         self.currentBoard="esp32"
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
 
         self.autoAPI.clear()
@@ -2048,8 +2071,8 @@ class MainWidget(QMainWindow):
 
     def boardTPYBoardV202(self):
         self.currentBoard="TPYBoardV202"
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
         self.autoAPI.clear()
         self.autoAPI.prepare()
@@ -2060,8 +2083,8 @@ class MainWidget(QMainWindow):
 
     def boardTPYBoardV102(self):
         self.currentBoard="TPYBoardV102"
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
         self.autoAPI.clear()
         self.autoAPI.prepare()
@@ -2072,8 +2095,8 @@ class MainWidget(QMainWindow):
 
     def boardEsp8266(self):
         self.currentBoard="esp8266"
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
         self.autoAPI.clear()
         self.autoAPI.prepare()
@@ -2085,8 +2108,8 @@ class MainWidget(QMainWindow):
 
     def boardPyboard(self):
         self.currentBoard="pyboard"
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
 
         self.autoAPI.clear()
@@ -2098,8 +2121,8 @@ class MainWidget(QMainWindow):
         self.createExampleMenu()
     def boardMicrobit(self):
         self.currentBoard="microbit"
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
 
         for i in MICROPYTHON_APIS:
@@ -2117,8 +2140,8 @@ class MainWidget(QMainWindow):
 
     def boardOpenMVSTM32F765(self):
         self.currentBoard="OpenMV"
-        # self.emit(SIGNAL("changeCurrentBoard"),self.currentBoard)
-        self.changeCurrentBoard.emit(self.currentBoard)
+        # self.emit(SIGNAL("sig_changeCurrentBoard"),self.currentBoard)
+        self.sig_changeCurrentBoard.emit(self.currentBoard)
         time.sleep(0.005)
 
     def boardOther(self):
@@ -3025,10 +3048,10 @@ class MainWidget(QMainWindow):
         while not self.readwriteQueue.empty():
             self.readwriteQueue.get()
 
-        # self.emit(SIGNAL("initRecvdata"))
-        # self.emit(SIGNAL("initMessycode"))
-        self.initRecvdata.emit()
-        self.initMessycode.emit()
+        # self.emit(SIGNAL("sig_initRecvdata"))
+        # self.emit(SIGNAL("sig_initMessycode"))
+        self.sig_initRecvdata.emit()
+        self.sig_initMessycode.emit()
 
         self.terminal.clear()
         self.terminal.setReadOnly(True)
@@ -3057,33 +3080,33 @@ class MainWidget(QMainWindow):
                 continue
             self.serialComList.append(i)
 
-            # self.emit(SIGNAL("timerAddComMenu"),i)
-            self.timerAddComMenu.emit(i)
+            # self.emit(SIGNAL("sig_timerAddComMenu"),i)
+            self.sig_timerAddComMenu.emit(i)
 
         for i in self.serialComList:
             if i not in mylist:
                 self.serialComList.remove(i)
-                # self.emit(SIGNAL("timerClearComMenu"))
-                self.timerClearComMenu.emit()
+                # self.emit(SIGNAL("sig_timerClearComMenu"))
+                self.sig_timerClearComMenu.emit()
                 time.sleep(0.1)
                 for j in self.serialComList:
-                    # self.emit(SIGNAL("timerSetComMenu"),j)
-                    self.timerSetComMenu.emit(j)
+                    # self.emit(SIGNAL("sig_timerSetComMenu"),j)
+                    self.sig_timerSetComMenu.emit(j)
         if self.currentCom=="":
             self.serialConnectToolsAction.setVisible(True)
             self.serialCloseToolsAction.setVisible(False)
         elif self.currentCom not in self.serialComList:
             self.currentCom=""
-            # self.emit(SIGNAL("timerCloseTerminal"))
-            self.timerCloseTerminal.emit()
+            # self.emit(SIGNAL("sig_timerCloseTerminal"))
+            self.sig_timerCloseTerminal.emit()
         timer=threading.Timer(0.2,self.fun_timer)
         timer.start()
 
 
 
-if __name__=="__main__":
-    app=QApplication(sys.argv)
-    main=MainWidget()
-    if mainShow:
-        main.show()
-        app.exec_()
+
+if __name__ == '__main__':
+
+    app = QApplication(sys.argv)
+    main = MainWidget()
+    sys.exit(app.exec_())
