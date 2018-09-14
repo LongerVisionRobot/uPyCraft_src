@@ -50,8 +50,8 @@ nowIDEVersion      ="1.1"
 isCheckFirmware    =False
 rootDirectoryPath  =os.path.expanduser("~")
 rootDirectoryPath  =rootDirectoryPath.replace("\\","/")
-currentTempPath    ="%s/AppData/Local/uPyCraft/temp/"%rootDirectoryPath
-currentExamplesPath="%s/AppData/Local/uPyCraft/examples"%rootDirectoryPath
+currentTempPath    ="%s/opt/uPyCraft/temp/"%rootDirectoryPath
+currentExamplesPath="%s/opt/uPyCraft/examples/"%rootDirectoryPath
 print(rootDirectoryPath)
 print(currentTempPath)
 print(currentExamplesPath)
@@ -760,13 +760,13 @@ class MainWidget(QMainWindow):
         self.PCcommonList=[]
         self.PCboardList=[]
         if self.currentBoard=="esp32":
-            self.getPCcommonExamples("%s/AppData/Local/uPyCraft/examples/Common"%rootDirectoryPath)
-            self.getPCboardExamples("%s/AppData/Local/uPyCraft/examples/Boards/ESP32"%rootDirectoryPath)
+            self.getPCcommonExamples("%s/opt/uPyCraft/examples/Common"%rootDirectoryPath)
+            self.getPCboardExamples("%s/opt/uPyCraft/examples/Boards/ESP32"%rootDirectoryPath)
             for filename in self.PCboardList:
                 if filename in self.PCcommonList:
                     self.PCcommonList.remove(filename)
 
-            self.getPCexamples("%s/AppData/Local/uPyCraft/examples/Boards/ESP32"%rootDirectoryPath,self.exampleMenu)
+            self.getPCexamples("%s/opt/uPyCraft/examples/Boards/ESP32"%rootDirectoryPath,self.exampleMenu)
 
             menuTitle=[]
 
@@ -786,13 +786,13 @@ class MainWidget(QMainWindow):
                     self.addPCcommonExamples(adir[1:],newMenu,adir[1:])
                     menuTitle.append(adirList[1])
         elif self.currentBoard=="esp8266":
-            self.getPCcommonExamples("%s/AppData/Local/uPyCraft/examples/Common"%rootDirectoryPath)
-            self.getPCboardExamples("%s/AppData/Local/uPyCraft/examples/Boards/ESP8266"%rootDirectoryPath)
+            self.getPCcommonExamples("%s/opt/uPyCraft/examples/Common"%rootDirectoryPath)
+            self.getPCboardExamples("%s/opt/uPyCraft/examples/Boards/ESP8266"%rootDirectoryPath)
             for filename in self.PCboardList:
                 if filename in self.PCcommonList:
                     self.PCcommonList.remove(filename)
 
-            self.getPCexamples("%s/AppData/Local/uPyCraft/examples/Boards/ESP8266"%rootDirectoryPath,self.exampleMenu)
+            self.getPCexamples("%s/opt/uPyCraft/examples/Boards/ESP8266"%rootDirectoryPath,self.exampleMenu)
             menuTitle=[]
             for i in self.exampleMenu.findChildren(QMenu):
                 menuTitle.append(i.title())
@@ -808,11 +808,11 @@ class MainWidget(QMainWindow):
                     self.addPCcommonExamples(adir[1:],newMenu,adir[1:])
                     menuTitle.append(adirList[1])
         elif self.currentBoard=="TPYBoardV202":
-            self.getPCboardExamples("%s/AppData/Local/uPyCraft/examples/Boards/TPYBoardV202"%rootDirectoryPath)
+            self.getPCboardExamples("%s/opt/uPyCraft/examples/Boards/TPYBoardV202"%rootDirectoryPath)
             for filename in self.PCboardList:
                 if filename in self.PCcommonList:
                     self.PCcommonList.remove(filename)
-            self.getPCexamples("%s/AppData/Local/uPyCraft/examples/Boards/TPYBoardV202"%rootDirectoryPath,self.exampleMenu)
+            self.getPCexamples("%s/opt/uPyCraft/examples/Boards/TPYBoardV202"%rootDirectoryPath,self.exampleMenu)
             menuTitle=[]
             for i in self.exampleMenu.findChildren(QMenu):
                 menuTitle.append(i.title())
@@ -829,11 +829,11 @@ class MainWidget(QMainWindow):
                     menuTitle.append(adirList[1])
 
         elif self.currentBoard=="pyboard":
-            self.getPCboardExamples("%s/AppData/Local/uPyCraft/examples/Boards/pyboard"%rootDirectoryPath)
+            self.getPCboardExamples("%s/opt/uPyCraft/examples/Boards/pyboard"%rootDirectoryPath)
             for filename in self.PCboardList:
                 if filename in self.PCcommonList:
                     self.PCcommonList.remove(filename)
-            self.getPCexamples("%s/AppData/Local/uPyCraft/examples/Boards/pyboard"%rootDirectoryPath,self.exampleMenu)
+            self.getPCexamples("%s/opt/uPyCraft/examples/Boards/pyboard"%rootDirectoryPath,self.exampleMenu)
             menuTitle=[]
             for i in self.exampleMenu.findChildren(QMenu):
                 menuTitle.append(i.title())
@@ -849,11 +849,11 @@ class MainWidget(QMainWindow):
                     self.addPCcommonExamples(adir[1:],newMenu,adir[1:])
                     menuTitle.append(adirList[1])
         elif self.currentBoard=="TPYBoardV102":
-            self.getPCboardExamples("%s/AppData/Local/uPyCraft/examples/Boards/TPYBoardV102"%rootDirectoryPath)
+            self.getPCboardExamples("%s/opt/uPyCraft/examples/Boards/TPYBoardV102"%rootDirectoryPath)
             for filename in self.PCboardList:
                 if filename in self.PCcommonList:
                     self.PCcommonList.remove(filename)
-            self.getPCexamples("%s/AppData/Local/uPyCraft/examples/Boards/TPYBoardV102"%rootDirectoryPath,self.exampleMenu)
+            self.getPCexamples("%s/opt/uPyCraft/examples/Boards/TPYBoardV102"%rootDirectoryPath,self.exampleMenu)
             menuTitle=[]
             for i in self.exampleMenu.findChildren(QMenu):
                 menuTitle.append(i.title())
@@ -870,12 +870,12 @@ class MainWidget(QMainWindow):
                     menuTitle.append(adirList[1])
 
         elif self.currentBoard=="microbit":
-            self.getPCboardExamples("%s/AppData/Local/uPyCraft/examples/Boards/microbit"%rootDirectoryPath)
+            self.getPCboardExamples("%s/opt/uPyCraft/examples/Boards/microbit"%rootDirectoryPath)
             for filename in self.PCboardList:
                 if filename in self.PCcommonList:
                     self.PCcommonList.remove(filename)
 
-            self.getPCexamples("%s/AppData/Local/uPyCraft/examples/Boards/microbit"%rootDirectoryPath,self.exampleMenu)
+            self.getPCexamples("%s/opt/uPyCraft/examples/Boards/microbit"%rootDirectoryPath,self.exampleMenu)
 
             menuTitle=[]
             for i in self.exampleMenu.findChildren(QMenu):
@@ -898,9 +898,9 @@ class MainWidget(QMainWindow):
         self.exampleTools.setMenu(self.exampleMenu)
 
     def createUpyLibMenu(self):
-        if not os.path.exists("%s/AppData/Local/uPyCraft/examples/uPy_lib"%rootDirectoryPath):
+        if not os.path.exists("%s/opt/uPyCraft/examples/uPy_lib"%rootDirectoryPath):
             return
-        uPyLibPath="%s/AppData/Local/uPyCraft/examples/uPy_lib"%rootDirectoryPath
+        uPyLibPath="%s/opt/uPyCraft/examples/uPy_lib"%rootDirectoryPath
         row=self.rootLib.rowCount()     #clear board treemodel
         self.rootLib.removeRows(0,row)  #use for refresh treemodel,these two lines
 
@@ -2188,7 +2188,7 @@ class MainWidget(QMainWindow):
         pathList=path.split("/")
         if pathList[1].find(".")>0:
             exampleAction=QAction(pathList[1],self)
-            exampleAction.setStatusTip("%s/AppData/Local/uPyCraft/examples/Common/%s"%(rootDirectoryPath,allpath))
+            exampleAction.setStatusTip("%s/opt/uPyCraft/examples/Common/%s"%(rootDirectoryPath,allpath))
             menu.addAction(exampleAction)
             return
         menuList=[]

@@ -42,8 +42,8 @@ class checkVersionExampleFire(QThread):
     def run(self):
         global nowExamplesVersion
 
-        if os.path.exists("%s/AppData/Local/uPyCraft/examples/info.json"%rootDirectoryPath)==True:
-            myfile=open("%s/AppData/Local/uPyCraft/examples/info.json"%rootDirectoryPath,"r")
+        if os.path.exists("%s/opt/uPyCraft/examples/info.json"%rootDirectoryPath)==True:
+            myfile=open("%s/opt/uPyCraft/examples/info.json"%rootDirectoryPath,"r")
             jsonMsg=myfile.read()
             myfile.close()
             jsonMsg=json.loads(jsonMsg)

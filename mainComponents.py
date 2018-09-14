@@ -11,7 +11,7 @@ from PyQt5.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython
 
 rootDirectoryPath  =os.path.expanduser("~")
 rootDirectoryPath  =rootDirectoryPath.replace("\\","/")
-currentExamplesPath="%s/AppData/Local/uPyCraft/examples"%rootDirectoryPath
+currentExamplesPath="%s/opt/uPyCraft/examples/"%rootDirectoryPath
 
 class myTerminal(QTextEdit):
     def __init__(self,queue,parent):
@@ -648,7 +648,7 @@ class myTreeView(QTreeView):
         elif dirList[1]=="sd":
             pass
         elif dirList[1]=="uPy_lib":
-            self.ui.fileName="%s/AppData/Local/uPyCraft/examples"%rootDirectoryPath+self.ui.fileName
+            self.ui.fileName="%s/opt/uPyCraft/examples/"%rootDirectoryPath+self.ui.fileName
         elif dirList[1]=="workSpace":
             if self.ui.createWorkSpacePath():
                 self.ui.fileName=self.ui.workspacePath[0:-10]+self.ui.fileName
@@ -794,7 +794,7 @@ class myTreeView(QTreeView):
                     pass
                 elif dirListDrag[1]=="uPy_lib" or dirListDrag[1]=="workSpace":#device外部拖入，需下载
                     if dirListDrag[1]=="uPy_lib":
-                        oldDragFileName="%s/AppData/Local/uPyCraft/examples"%rootDirectoryPath+oldDragFileName
+                        oldDragFileName="%s/opt/uPyCraft/examples/"%rootDirectoryPath+oldDragFileName
                     elif dirListDrag[1]=="workSpace":
                         oldDragFileName=self.ui.workspacePath[0:-10]+oldDragFileName
                     if str(dirListDrop[-1]).find(".")<0:
