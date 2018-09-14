@@ -81,7 +81,7 @@ class threadUserFirmware(QThread):
                 # self.emit(SIGNAL("sig_firmwareAnyUpdate"),-2)
                 self.sig_firmwareAnyUpdate.emit(-2)
                 time.sleep(0.5)
-                # self.emit(SIGNAL("goMicrobitUpdate"))
+                # self.emit(SIGNAL("sig_goMicrobitUpdate"))
                 self.sig_goMicrobitUpdate.emit()
         except:
             # self.emit(SIGNAL("sig_firmwareAnyUpdate"),-1)
