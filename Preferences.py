@@ -10,7 +10,8 @@ from PyQt5.QtWidgets import *
 
 class SerialWidget(QWidget):
     def __init__(self,parent=None):
-        super(SerialWidget,self).__init__(parent)
+        # super(SerialWidget,self).__init__(parent)
+        super().__init__()
 
         serialBaund=QLabel("baud")
         self.baundComboBox=QComboBox()
@@ -75,7 +76,8 @@ class SerialWidget(QWidget):
 
 class LanLocWidget(QWidget):
     def __init__(self,parent=None):
-        super(LanLocWidget,self).__init__(parent)
+        # super(LanLocWidget,self).__init__(parent)
+        super().__init__()
 
         languageLabel=QLabel(self.tr("Language"))
         self.languageComBox=QComboBox()
@@ -101,7 +103,8 @@ class LanLocWidget(QWidget):
 
 class updateConfig(QWidget):
     def __init__(self,parent=None):
-        super(updateConfig,self).__init__(parent)
+        # super(updateConfig,self).__init__(parent)
+        super().__init__()
 
         checkFirmware=QLabel(self.tr("CheckFirmware"))
         self.checkBinComBox=QComboBox()
@@ -118,7 +121,9 @@ class updateConfig(QWidget):
 
 class Preferences(QDialog):
     def __init__(self,parent=None):
-        super(Preferences,self).__init__(parent)
+        # super(Preferences,self).__init__(parent)
+        super().__init__()
+        
         self.widget=QWidget()
         layout=QGridLayout(self.widget)
 
