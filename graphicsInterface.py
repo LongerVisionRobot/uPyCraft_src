@@ -15,7 +15,9 @@ import serial.tools.list_ports
 
 class findReplaceText(QDialog):
     def __init__(self,parent=None):
-        super(findReplaceText,self).__init__(parent)
+        # super(findReplaceText,self).__init__(parent)
+        super().__init__()
+
         self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
         self.setWindowTitle("Find&Replace")
         self.setWindowIcon(QIcon(':/logo.png'))
@@ -42,7 +44,9 @@ class findReplaceText(QDialog):
 
 class saveUntitled(QDialog):
     def __init__(self,parent=None):
-        super(saveUntitled,self).__init__(parent)
+        # super(saveUntitled,self).__init__(parent)
+        super().__init__()
+
         self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
         self.setWindowTitle("save at your workSpace")
         self.resize(400,80)
@@ -82,7 +86,9 @@ class saveUntitled(QDialog):
 
 class treeRightClickRename(QDialog):
     def __init__(self,parent=None):
-        super(treeRightClickRename,self).__init__(parent)
+        # super(treeRightClickRename,self).__init__(parent)
+        super().__init__()
+
         self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
         self.setWindowTitle("Rename as")
         self.setWindowIcon(QIcon(':/logo.png'))
@@ -117,7 +123,9 @@ class treeRightClickRename(QDialog):
 
 class createBoardNewDirName(QDialog):
     def __init__(self,parent=None):
-        super(createBoardNewDirName,self).__init__(parent)
+        # super(createBoardNewDirName,self).__init__(parent)
+        super().__init__()
+
         self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
         self.setWindowTitle("boardDirName")
         self.setWindowIcon(QIcon(':/logo.png'))
@@ -153,7 +161,8 @@ class createBoardNewDirName(QDialog):
 
 class SerialWidget(QWidget):
     def __init__(self,parent=None):
-        super(SerialWidget,self).__init__(parent)
+        # super(SerialWidget,self).__init__(parent)
+        super().__init__()
 
         serialBaund=QLabel("baud")
         self.baundComboBox=QComboBox()
@@ -217,7 +226,8 @@ class SerialWidget(QWidget):
 
 class LanLocWidget(QWidget):
     def __init__(self,parent=None):
-        super(LanLocWidget,self).__init__(parent)
+        # super(LanLocWidget,self).__init__(parent)
+        super().__init__()
 
         languageLabel=QLabel(self.tr("Language"))
         self.languageComBox=QComboBox()
@@ -240,7 +250,8 @@ class LanLocWidget(QWidget):
 
 class updateConfig(QWidget):
     def __init__(self,parent=None):
-        super(updateConfig,self).__init__(parent)
+        # super(updateConfig,self).__init__(parent)
+        super().__init__()
 
         checkFirmware=QLabel(self.tr("CheckFirmware"))
         self.checkBinComBox=QComboBox()
@@ -257,7 +268,9 @@ class updateConfig(QWidget):
 
 class Preferences(QDialog):
     def __init__(self,parent=None):
-        super(Preferences,self).__init__(parent)
+        # super(Preferences,self).__init__(parent)
+        super().__init__()
+        
         self.setWindowFlags(Qt.WindowCloseButtonHint)#HelpButtonHint?
         self.setStyleSheet("""QDialog{background-color: rgb(236, 236, 236);color:black;}
                            """)
