@@ -1208,6 +1208,12 @@ class myTabWidget(QTabWidget):
 
 class myQsciScintilla(QsciScintilla):
     sig_dragOpenFile = pyqtSignal(str)
+    sig_textChanged = pyqtSignal()
+    sig_selectionChanged = pyqtSignal()
+    sig_linesChanged = pyqtSignal()
+    sig_cursorPositionChanged = pyqtSignal()
+    sig_userListActivated = pyqtSignal()
+    sig_customContextMenuRequested = pyqtSignal()
 
     def __init__(self,parent=None):
         # super(myQsciScintilla,self).__init__(parent)
