@@ -26,6 +26,7 @@ class checkVersionExampleFire(QThread):
     sig_updateThing = pyqtSignal(str, str)
     sig_updataPer = pyqtSignal(int)
     sig_reflushExamples = pyqtSignal()
+    sig_updatePer = pyqtSignal(int)
 
     def __init__(self, parent=None):
         # super(checkVersionExampleFire,self).__init__(parent)
