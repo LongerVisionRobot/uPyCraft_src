@@ -184,27 +184,27 @@ class checkVersionExampleFire(QThread):
             self.reDownload()
 
 
-    def confirmUpdate(self,gotoUpdata):
-        if gotoUpdata=="IDE":
+    def confirmUpdate(self,gotoUpdate):
+        if gotoUpdate=="IDE":
             self.idenameList = str(self.ideList[0][self.system]["url"]).split("/")
             self.updateSize=self.ideList[0][self.system]["size"]
             self.url=self.ideList[0][self.system]["url"]
             self.downpath=self.idenameList[-1]
             self.nowDownload="IDE"
-        elif gotoUpdata=="IDEcancel":
+        elif gotoUpdate=="IDEcancel":
             if self.examplesList[0]["version"]>nowExamplesVersion:
                 print("examples has new version")
                 # self.emit(SIGNAL("sig_updateThing"),"update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
                 self.sig_updateThing.emit("update uPyCraft Examples","There is a new version available for EXAMPLES, would you like to upgrade now?")
             else:
                 self.isDownload=False
-        elif gotoUpdata=="Examples":
+        elif gotoUpdate=="Examples":
             self.url = self.examplesList[0]["url"]
             examplesNameList = str(self.url).split("/")
             self.updateSize=self.examplesList[0]["size"]
             self.downpath="%s/AppData/Local/uPyCraft/download/%s"%(rootDirectoryPath,examplesNameList[-1])
             self.nowDownload="Examples"
-        elif gotoUpdata=="Examplescancel":
+        elif gotoUpdate=="Examplescancel":
             self.isDownload=False
 
 
