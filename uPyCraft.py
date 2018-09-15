@@ -31,7 +31,7 @@ import pyflakes
 from urllib import request
 from pyflakes.api import main as pyflakesMain
 
-sys.path.append('/media/jiapei/Data/Downloads/programming/ide/uPyCraft/uPyCraft')
+sys.path.append('~/opt/uPyCraft')
 
 from graphicsInterface          import saveUntitled, createBoardNewDirName, findReplaceText, \
                                                 SerialWidget, LanLocWidget, Preferences, treeRightClickRename
