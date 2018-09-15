@@ -1045,12 +1045,12 @@ class MainWidget(QMainWindow):
 ###any slot function
 #File
     def slotOpenFile(self):
-        filename=QFileDialog.getOpenFileName(self)
+        filename=str(QFileDialog.getOpenFileName(self))
         filename=filename.replace("\\","/")
-        if str(filename).find(".py")<0 and \
-           str(filename).find(".txt")<0 and \
-           str(filename).find(".json")<0 and \
-           str(filename).find(".ini")<0:
+        if filename.find(".py")<0 and \
+           filename.find(".txt")<0 and \
+           filename.find(".json")<0 and \
+           filename.find(".ini")<0:
             self.terminal.append("current version only open py txt json ini file")
             return
         self.pcOpenFile(filename)
@@ -2478,7 +2478,7 @@ class MainWidget(QMainWindow):
 
     def chooseUserFirmware(self):
         self.updateBin.hide()
-        usersFirmware=QFileDialog.getOpenFileName(self)
+        usersFirmware=str(QFileDialog.getOpenFileName(self))
         self.updateBin.show()
         usersFirmware=usersFirmware.replace("\\","/")
         self.updateBin.firmwareName.setText(usersFirmware)
@@ -2492,7 +2492,7 @@ class MainWidget(QMainWindow):
                 if self.myserial.ser.isOpen():
                     self.slotCloseSerial()
 
-                print("updata!")
+                print("update!")
                 if os.path.exists("%s/AppData/Local/uPyCraft/update.json"%rootDirectoryPath)==False:
                     self.terminal.append("hope to connect internet and restart the IDE")
                     return
