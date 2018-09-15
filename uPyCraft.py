@@ -217,12 +217,12 @@ class MainWidget(QMainWindow):
 #check version(IDE,examples)
         self.check=checkVersionExampleFire(self)
         # self.connect(self.check,SIGNAL("sig_updateThing"),self.sig_updateThing)
-        # self.connect(self.check,SIGNAL("sig_updatePer"),self.updataPer)
+        # self.connect(self.check,SIGNAL("sig_updatePer"),self.updatePer)
         # self.connect(self.check,SIGNAL("sig_reflushExamples"),self.sig_reflushExamples)
         # self.connect(self.check,SIGNAL("sig_changeUpdateFirmwareList"),self.changeUpdateFirmwareList)
         # self.connect(self.check,SIGNAL("sig_setIsCheckFirmware"),self.setIsCheckFirmware)
         self.check.sig_updateThing.connect(self.updateThing)
-        self.check.sig_updataPer.connect(self.updataPer)
+        self.check.sig_updatePer.connect(self.updatePer)
         self.check.sig_reflushExamples.connect(self.reflushExamples)
         self.check.sig_changeUpdateFirmwareList.connect(self.changeUpdateFirmwareList)
         self.check.sig_setIsCheckFirmware.connect(self.setIsCheckFirmware)
@@ -2714,7 +2714,7 @@ class MainWidget(QMainWindow):
         self.sig_confirmUpdate.emit(self.updateThingWindowName.split(" ")[-1])
         self.updateIdeExample.close()
 
-    def updataPer(self,per):
+    def updatePer(self,per):
         if per==-1:
             self.updataIDEorExamplesBar.close()
             QMessageBox.information(self,self.tr("attention"),self.tr("download false."),QMessageBox.Ok)
