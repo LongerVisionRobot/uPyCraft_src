@@ -22,7 +22,7 @@ rootDirectoryPath  =rootDirectoryPath.replace("\\","/")
 class checkVersionExampleFire(QThread):
     # Modified by Pei JIA, 2018-09-13
     sig_setIsCheckFirmware = pyqtSignal(bool)
-    sig_changeUpdateFirmwareList = pyqtSignal(list)
+    sig_changeUpdateFirmwareList = pyqtSignal(dict)
     sig_updateThing = pyqtSignal(str, str)
     sig_updataPer = pyqtSignal(int)
     sig_reflushExamples = pyqtSignal()
@@ -109,8 +109,8 @@ class checkVersionExampleFire(QThread):
             # self.emit(SIGNAL("sig_changeUpdateFirmwareList"),self.firmwareList)
             self.sig_changeUpdateFirmwareList.emit(self.firmwareList)
 
-            # self.connect(self.ui,SIGNAL("confirmUpdata"),self.confirmUpdata)
-            self.ui.sig_confirmUpdata.connect(self.confirmUpdata)
+            # self.connect(self.ui,SIGNAL("sig_confirmUpdate"),self.confirmUpdate)
+            self.ui.sig_confirmUpdate.connect(self.confirmUpdate)
 
             #IDE
             if self.ideList[0]["version"]>nowIDEVersion:
@@ -170,7 +170,7 @@ class checkVersionExampleFire(QThread):
     def reDownload(self):
         if self.reDownloadNum==3:
             self.downloadOk=False
-            # self.emit(SIGNAL("updatePer"),-1)
+            # self.emit(SIGNAL("sig_updatePer"),-1)
             self.sig_updatePer.emit(-1)
             return
         try:
@@ -184,7 +184,7 @@ class checkVersionExampleFire(QThread):
             self.reDownload()
 
 
-    def confirmUpdata(self,gotoUpdata):
+    def confirmUpdate(self,gotoUpdata):
         if gotoUpdata=="IDE":
             self.idenameList = str(self.ideList[0][self.system]["url"]).split("/")
             self.updateSize=self.ideList[0][self.system]["size"]
