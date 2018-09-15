@@ -97,6 +97,7 @@ class MainWidget(QMainWindow):
     sig_timerSetComMenu = pyqtSignal(int)
     sig_timerClearComMenu = pyqtSignal()
     sig_exitCheckThread = pyqtSignal()
+    sig_confirmUpdate = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -2701,16 +2702,16 @@ class MainWidget(QMainWindow):
         self.updateIdeExample.exec_()
 
     def updateIdeExampleCancel(self):
-        # self.emit(SIGNAL("confirmUpdata"),self.updateThingWindowName.split(" ")[-1]+"cancel")
-        self.confirmUpdata.emit(self.updateThingWindowName.split(" ")[-1]+"cancel")
+        # self.emit(SIGNAL("sig_confirmUpdate"),self.updateThingWindowName.split(" ")[-1]+"cancel")
+        self.sig_confirmUpdate.emit(self.updateThingWindowName.split(" ")[-1]+"cancel")
         self.updateIdeExample.close()
 
     def updateIdeExampleOk(self):
         self.updataIDEorExamplesBar=ProgressIDEorExampleBar(self.updateThingWindowName+"...")
         self.updataIDEorExamplesBar.show()
 
-        # self.emit(SIGNAL("confirmUpdata"),self.updateThingWindowName.split(" ")[-1])
-        self.confirmUpdata.emit(self.updateThingWindowName.split(" ")[-1])
+        # self.emit(SIGNAL("sig_confirmUpdate"),self.updateThingWindowName.split(" ")[-1])
+        self.sig_confirmUpdate.emit(self.updateThingWindowName.split(" ")[-1])
         self.updateIdeExample.close()
 
     def updataPer(self,per):
